@@ -1,0 +1,13 @@
+# Data read from C:\MocwtNew\Experiment\mt3dms\tvd\rmamttvd.nam
+# File generated on 4/6/2016 3:53:32 PM
+LIST 13 rmamttvd.lst
+DIS 14 rmamttvd.dis
+BAS6 15 rmamttvd.bas
+OC 18 rmamttvd.oc
+LPF 19 rmamttvd.lpf
+WEL 20 rmamttvd.wel
+PCG 21 rmamttvd.pcg
+#GWT 22 rmamttvd.gwt
+LMT6 23 rmamttvd.lmt
+DATA 12 rmamttvd.fhd
+DATA(BINARY) 11 rmamttvd.bud REPLACE

@@ -1,0 +1,10 @@
+# Data read from D:\MocwtSrc\Mocwt\rma2k.gwt
+# File generated on 4/14/2015 3:12:15 PM
+CLST 22 rma2k.out
+MOCWT 23 rma2k.moc
+PRTP 24 rma2k.prtp
+CNCA 25 rma2k.cna REPLACE
+VELA 26 rma2k.vla REPLACE
+PRTA 27 rma2k.pta REPLACE
+OBS 28 rma2k.mob
+DATA 11 rma2k.oba

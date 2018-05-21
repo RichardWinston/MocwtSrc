@@ -1,0 +1,125 @@
+C  CDRN5  SOLUTE SINKS AT DRAINS  
+C     ******************************************************************
+C
+      SUBROUTINE GWT1DRN5BD(NDRAIN,MXDRN,
+     *                   DRAI,IBOUND,NCOL,NROW,NLAY,
+     *  SNKFLO,
+     *  NSCOL,NSROW,NSLAY,IOUTS,NDRNVL,IDRNAL,ICONLY,KSTP,KPER,NOPRDR,
+     *  VC,VR,VL,IPERGWT,IFACEC)
+C
+C     ******************************************************************
+C
+      DIMENSION VC(NSCOL+1,NSROW,NSLAY),VR(NSCOL,NSROW+1,NSLAY),
+     *   VL(NSCOL,NSROW,NSLAY+1)  
+      CHARACTER*8 PACKAGE
+C
+      DIMENSION DRAI(NDRNVL,MXDRN)
+      DIMENSION IBOUND(NCOL,NROW,NLAY),
+     1  SNKFLO(NSCOL,NSROW,NSLAY)
+C
+      COMMON /DRNCOM/DRNAUX(5)
+      CHARACTER*16 DRNAUX
+C
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+C     ******************************************************************
+C
+C  ADD DRAINS (SINKS ONLY)
+      IDRNSG=0
+      ITHKSG=0
+      IPRNT=0
+C  CHECK EXISTENCE OF CBCALLOCATE OPTION
+      IF (IDRNAL.NE.1) THEN
+         WRITE(IOUTS,*) ' ERROR, CBCALLOCATE OPTION MUST BE ',
+     *        'SPECIFIED IN DRAIN INPUT DATA'
+         STOP
+      ENDIF
+C RETURN IF NOT SOLVING TRANSPORT YET
+      IF(KPER.LT.IPERGWT) RETURN
+C  SET POINTER TO IFACE VALUE FOR DRAINS
+      IF(KPER.EQ.IPERGWT.AND.KSTP.EQ.1) THEN
+C COUNT FROM THE TOTAL NUMBER OF STANDARD DATA INPUTS FOR DRAINS (5)
+         NAUX=NDRNVL-5-IDRNAL
+         IFACEC=0
+         IF(NAUX.GT.0) THEN
+           DO 8 IAUX=1,NAUX
+             IF(DRNAUX(IAUX).EQ.'IFACE') THEN
+               IFACEC=IAUX+5
+             END IF
+ 8         CONTINUE
+         END IF
+         IF(IFACEC.EQ.0) WRITE(IOUTS,*) ' IFACE NOT DEFINED: ', 
+     *         'ALL DRAINS APPLIED AS DISTRIBUTED SINKS'
+      END IF
+C
+C  RETURN IF NO ACTIVE DRAINS THIS PERIOD
+      IF(NDRAIN.LE.0) RETURN
+CC
+      DO 10 ID=1,NDRAIN
+         K=DRAI(1,ID)
+         KS=K-ISLAY1+1
+         IF(KS.LT.1.OR.KS.GT.NSLAY) GO TO 10
+         I=DRAI(2,ID)
+         IS=I-ISROW1+1
+         IF(IS.LT.1.OR.IS.GT.NSROW) GO TO 10
+         J=DRAI(3,ID)
+C  SKIP DRAINS IN FIXED HEAD CELLS
+         IF(IBOUND(J,I,K).LE.0) THEN
+           ITHKSG=ITHKSG+1
+           GO TO 10
+         ENDIF
+         JS=J-ISCOL1+1
+         IF(JS.LT.1.OR.JS.GT.NSCOL) GO TO 10
+         IF(KSTP.EQ.1) THEN
+           IF(IFACEC.LE.0) THEN
+            IF(IPRNT.EQ.0.AND.NOPRDR.NE.1) WRITE(IOUTS,1000)
+ 1000       FORMAT(//' DRAINS WITHIN SUBGRID THIS STRESS PERIOD'//
+     1      '  DRAIN NO.   LAYER      ROW     COLUMN'/
+     2      1X,40('-'))
+            IF(NOPRDR.NE.1) WRITE(IOUTS,'(1X,I6,3I10)') ID,K,I,J
+           ELSE
+            IFACE=DRAI(IFACEC,ID)
+            IF(IPRNT.EQ.0.AND.NOPRDR.NE.1) WRITE(IOUTS,1001)
+ 1001       FORMAT(//' DRAINS WITHIN SUBGRID THIS STRESS PERIOD'//
+     1      '  DRAIN NO.   LAYER      ROW     COLUMN   IFACE'/
+     2      1X,48('-'))
+            IF(NOPRDR.NE.1) WRITE(IOUTS,'(1X,I6,4I10)') ID,K,I,J,IFACE
+           END IF
+            IPRNT=1
+         END IF
+C
+         IF(ICONLY.EQ.1) THEN
+            IDRNSG=IDRNSG+1
+         ELSE
+            RATE=DRAI(NDRNVL,ID)
+            IFACE=0
+            IF(IFACEC.GT.0) IFACE=DRAI(IFACEC,ID)
+            IF(IFACE.LT.0) IFACE=-1
+            IF(IFACE.NE.0) THEN
+              PACKAGE='   DRAIN'
+              IPCK=ID
+              CALL GWT1BFLX5PCK(IFACE,IBOUND,RATE,PACKAGE,IPCK,
+     *         VC,VR,VL,
+     *         NCOL,NROW,NLAY,NSCOL,NSROW,NSLAY,
+     *         IOUTS,
+     *         J,I,K,JS,IS,KS)
+            END IF
+C
+            SNKFLO(JS,IS,KS)=SNKFLO(JS,IS,KS)+RATE
+         ENDIF
+   10 CONTINUE
+C
+      IF(IDRNSG.GT.0) THEN
+         WRITE(IOUTS,*) ' ERROR,',IDRNSG,' DRAINS WITHIN SUBGRID, ',
+     *        'BUT ICONLY=1, STOPPING'
+         STOP
+      END IF
+C  WARN IF DRAIN NODE WITHIN SUBGRID, BUT NO FLOW ASSOC WITH IT
+      IF(ITHKSG.GT.0) THEN
+         WRITE(IOUTS,*) ' WARNING:',ITHKSG,' DRAIN NODES',
+     *     ' SKIPPED WITHIN SUBGRID (IBOUND <= 0)'
+      ENDIF
+C
+      RETURN
+      END

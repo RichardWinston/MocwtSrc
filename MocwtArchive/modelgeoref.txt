@@ -1,0 +1,9 @@
+# Winston, R.B., Konikow, L.F., and Hornberger, G.Z. 2017. Volume-Weighted Particle-Tracking Method for Solute-
+Transport Modeling: Implementation in MODFLOW-GWT. U.S. Geological Survey, Techniques and Methods 6-A##.
+
+# Data Release digital object identifier = doi:10.5066/F78050RV
+
+upper_left  -77.3570 38.9586 
+upper_right -77.3570 38.9586
+lower_right -77.3570 38.9586
+lower_left  -77.3570 38.9586

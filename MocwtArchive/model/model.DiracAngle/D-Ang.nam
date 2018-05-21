@@ -1,0 +1,11 @@
+# Data read from C:\MocwtNew\testcases\MOCWT Documentation Data Sets\Dirac-angle-MOCWT\DiracAngle\D-Ang.nam
+# File generated on 12/8/2016 4:21:33 PM
+LIST 13 D-Ang.lst
+DIS 14 D-Ang.dis
+BAS6 15 D-Ang.bas
+OC 18 D-Ang.oc
+LPF 19 D-Ang.lpf
+PCG 20 D-Ang.pcg
+GWT 21 D-Ang.gwt
+DATA 11 D-Ang.fhd
+DATA(BINARY) 7 D-Ang.bud REPLACE

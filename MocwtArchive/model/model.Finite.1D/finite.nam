@@ -1,0 +1,12 @@
+# Data read from D:\MocwtSrc\MOCWT Documentation Data Sets\finite x-dir\New\finite.nam
+# File generated on 11/14/2016 11:53:50 AM
+LIST 14 finite.lst
+DIS 15 finite.dis
+BAS6 18 finite.bas
+OC 19 finite.oc
+BCF6 20 finite.bcf
+SIP 21 finite.sip
+GWT 22 finite.gwt
+DATA 11 finite.fhd
+DATA 12 finite.fdn
+DATA(BINARY) 7 finite.bud REPLACE

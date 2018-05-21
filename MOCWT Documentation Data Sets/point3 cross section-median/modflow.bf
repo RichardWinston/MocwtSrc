@@ -1,0 +1,2 @@
+point3.nam
+

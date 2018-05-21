@@ -1,0 +1,373 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>Richard B. Winston</origin>
+        <pubdate>2016</pubdate>
+        <title>Volume-Weighted Particle-Tracking Method for Solute-Transport Modeling: Implementation in MODFLOW-GWT</title>
+        <geoform>Groundwater model input and output files along with related data</geoform>
+        <serinfo>
+          <sername>Techniques and Methods</sername>
+          <issue>6-A##</issue>
+        </serinfo>
+        <pubinfo>
+          <pubplace>Reston Va</pubplace>
+          <publish>U.S. Geological Survey</publish>
+        </pubinfo>
+        <onlink>doi:10.5066/F78050RV</onlink>
+        <lworkcit>
+          <citeinfo>
+            <origin>Richard B. Winston</origin>
+            <pubdate>2017</pubdate>
+            <title>Volume-Weighted Particle-Tracking Method for Solute-Transport Modeling: Implementation in MODFLOW-GWT</title>
+            <serinfo>
+              <sername>Techniques and Methods</sername>
+              <issue>6-A##</issue>
+            </serinfo>
+            <pubinfo>
+              <pubplace>Reston, Va</pubplace>
+              <publish>U.S. Geological Survey</publish>
+            </pubinfo>
+          </citeinfo>
+        </lworkcit>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>In the traditional method of characteristics for groundwater solute-transport models, advective transport is represented by moving particles that track concentration. This approach can lead to global mass-balance problems because in models of aquifers having complex boundary conditions and heterogeneous properties, particles can originate in cells having different pore volumes and (or) be introduced (or removed) at cells representing fluid sources (or sinks) of varying strengths. Use of volume-weighted particles means that each particle tracks solute mass. In source/sink cells, the changes in particle weights will match the volume of water added or removed through external fluxes. This enables the new method to conserve mass in source/sink cells as well as globally. This approach also leads to potential efficiencies by allowing the number of particles per cell to vary spatially—using more particles where concentration gradients are high and fewer where gradients are low. The approach also eliminates the need for the model user to have to distinguish between “weak” and “strong” fluid source (or sink) cells. The new model determines whether solute mass added by fluid sources in a cell should be represented by (1) new particles having weights representing appropriate fractions of the volume of water added by the source, or (2) distributing the solute mass added over all particles already in the source cell. The first option is more appropriate for the condition of a strong source. The latter option is more appropriate for a weak source. At sinks, decisions whether or not to remove a particle are replaced by a reduction in particle weight in proportion to the volume of water removed. A number of test cases demonstrate that the new method works well and conserves mass. The method is incorporated into a new version of the U.S. Geological Survey&apos;s MODFLOW-GWT solute-transport model.</abstract>
+      <purpose>The models in this archive are used to help document the new version of MODFLOW-GWT using volume-weighted particles.</purpose>
+    </descript>
+    <timeperd>
+      <timeinfo>
+        <sngdate>
+          <caldate>2017</caldate>
+        </sngdate>
+      </timeinfo>
+      <current>publication date</current>
+    </timeperd>
+    <status>
+      <progress>Complete</progress>
+      <update>Not planned</update>
+    </status>
+    <spdom>
+      <bounding>
+        <westbc>-77.357</westbc>
+        <eastbc>-77.357</eastbc>
+        <northbc>38.9586</northbc>
+        <southbc>38.9586</southbc>
+      </bounding>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>USGS Thesaurus</themekt>
+        <themekey>usgsgroundwatermodel</themekey>
+        <themekey>MODFLOW-GWT</themekey>
+        <themekey>hydrogeology</themekey>
+        <themekey>MT3DMS</themekey>
+        <themekey>MODFLOW GUI</themekey>
+      </theme>
+      <place>
+        <placekt>Geographic Names Information System (GNIS)</placekt>
+        <placekey>Reston, VA</placekey>
+      </place>
+    </keywords>
+    <accconst>none</accconst>
+    <useconst>none</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntperp>
+          <cntper>Richard B. Winston</cntper>
+          <cntorg>U.S. Geological Survey</cntorg>
+        </cntperp>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>12201 Sunrise Valley Dr</address>
+          <city>Reston</city>
+          <state>VA</state>
+          <postal>20192</postal>
+          <country>USA</country>
+        </cntaddr>
+        <cntvoice>301 474 2762</cntvoice>
+        <cntemail>rbwinst@usgs.gov</cntemail>
+      </cntinfo>
+    </ptcontac>
+    <browse>
+      <browsen>BrowseGraphic.png</browsen>
+      <browsed>Thumbnail image of the benchmarking model used to help document the new version of MODFLOW-GWT.</browsed>
+      <browset>PNG</browset>
+    </browse>
+  </idinfo>
+  <dataqual>
+    <attracc>
+      <attraccr>No formal attribute accuracy tests were conducted</attraccr>
+    </attracc>
+    <logic>No formal logical accuracy tests were conducted</logic>
+    <complete>Data set is considered complete for the information presented, as described in the abstract. Users are advised to read the rest of the metadata record carefully for additional details.</complete>
+    <posacc>
+      <horizpa>
+        <horizpar>No formal positional accuracy tests were conducted</horizpar>
+      </horizpa>
+      <vertacc>
+        <vertaccr>No formal positional accuracy tests were conducted</vertaccr>
+      </vertacc>
+    </posacc>
+    <lineage>
+      <procstep>
+        <procdesc>The models included in this archive are all hypothetical models. As such, the data do not represent any properties of the real world.</procdesc>
+        <procdate>20160101</procdate>
+      </procstep>
+    </lineage>
+  </dataqual>
+  <eainfo>
+    <detailed>
+      <enttyp>
+        <enttypl>model.zip</enttypl>
+        <enttypd>model input files</enttypd>
+        <enttypds>Richard B. Winston</enttypds>
+      </enttyp>
+      <attr>
+        <attrlabl>*.bas</attrlabl>
+        <attrdef>Basic package input file</attrdef>
+        <attrdefs>MODFLOW-2000 documentation</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>-infinity</rdommin>
+            <rdommax>+infinity</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+    </detailed>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntperp>
+          <cntper>Richard B. Winston</cntper>
+          <cntorg>U.S. Geological Survey</cntorg>
+        </cntperp>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>12201 Sunrise Valley Dr</address>
+          <city>Reston</city>
+          <state>VA</state>
+          <postal>20192</postal>
+          <country>USA</country>
+        </cntaddr>
+        <cntvoice>301 474 2762</cntvoice>
+        <cntemail>rbwinst@usgs.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <distliab>Unless otherwise stated, all data, metadata and related materials are considered to satisfy the quality standards relative to the purpose for which the data were collected. Although these data and associated metadata have been reviewed for accuracy and completeness and approved for release by the U.S. Geological Survey (USGS), no warranty expressed or implied is made regarding the display or utility of the data on any other system or for general or scientific purposes, nor shall the act of distribution constitute any such warranty.</distliab>
+    <techpreq>The ancillary data for this archive contains Argus ONE project files. The user must use Argus ONE together with the plug-in MODFLOW GUI to use the Argus ONE project files.</techpreq>
+    <stdorder>
+      <fees>n/a</fees>
+      <digform>
+        <digtinfo>
+          <formname>modelgeoref.txt</formname>
+          <formvern>1.0</formvern>
+          <formspec>TXT File</formspec>
+          <formcont>ASCII file with the four corners of the model domain</formcont>
+          <transize>0.00038909912109375</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>http://water.usgs.gov/GIS/dsdl/gwmodels/Archive3/modelgeoref.txt</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>readme.txt</formname>
+          <formvern>1.0</formvern>
+          <formspec>TXT File</formspec>
+          <formcont>A file that documents the structure of the model archive</formcont>
+          <transize>0.137593269348145</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>http://water.usgs.gov/GIS/dsdl/gwmodels/Archive3/readme.txt</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>ancillary.zip</formname>
+          <formvern>1.0</formvern>
+          <formspec>ZIP File</formspec>
+          <formcont>This directory contains ancillary data</formcont>
+          <transize>11.1464109420776</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>http://water.usgs.gov/GIS/dsdl/gwmodels/Archive3/ancillary.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>bin.zip</formname>
+          <formvern>1.0</formvern>
+          <formspec>ZIP File</formspec>
+          <formcont>This directory contains the executables used to do the analysis</formcont>
+          <transize>4.48862648010254</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>http://water.usgs.gov/GIS/dsdl/gwmodels/Archive3/bin.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>georef.zip</formname>
+          <formvern>1.0</formvern>
+          <formspec>ZIP File</formspec>
+          <formcont>This directory contains a shape file defining the active and inactive areas of the model used for benchmarking MODFLOW-GWT for comparison with MT3DMS.
+The test problem represents an analog based on, and greatly simplified from, the groundwater contamination problem at the Rocky Mountain Arsenal, Colorado (see Konikow, 1977).</formcont>
+          <transize>0.00265693664550781</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>http://water.usgs.gov/GIS/dsdl/gwmodels/Archive3/georef.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>model.zip</formname>
+          <formvern>1.0</formvern>
+          <formspec>ZIP File</formspec>
+          <formcont>This directory contains all the input files for the models and usgs.model.reference files.</formcont>
+          <transize>1.11774730682373</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>http://water.usgs.gov/GIS/dsdl/gwmodels/Archive3/model.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>output.zip</formname>
+          <formvern>1.0</formvern>
+          <formspec>ZIP File</formspec>
+          <formcont>This directory contains all the output files for the models</formcont>
+          <transize>133.27855014801</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>http://water.usgs.gov/GIS/dsdl/gwmodels/Archive3/output.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>source.zip</formname>
+          <formvern>1.0</formvern>
+          <formspec>ZIP File</formspec>
+          <formcont>Source code for the models used to run the model simulations.</formcont>
+          <transize>1.85178089141846</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>http://water.usgs.gov/GIS/dsdl/gwmodels/Archive3/source.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>BrowseGraphic.png</formname>
+          <formvern>1.0</formvern>
+          <formspec>PNG File</formspec>
+          <formcont>Image of the model used for benchmarking MODFLOW-GWT for comparison with MT3DMS.
+The test problem represents an analog based on, and greatly simplified from, the groundwater contamination problem at the Rocky Mountain Arsenal, Colorado (see Konikow, 1977).</formcont>
+          <transize>0.0161733627319336</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>http://water.usgs.gov/GIS/dsdl/gwmodels/Archive3/BrowseGraphic.png</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Metadata.xml</formname>
+          <formvern>1.0</formvern>
+          <formspec>XML File</formspec>
+          <formcont>FGDC metadata for this archive</formcont>
+          <transize>0.00853157043457031</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>http://water.usgs.gov/GIS/dsdl/gwmodels/Archive3/Metadata.xml</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+    </stdorder>
+  </distinfo>
+  <metainfo>
+    <metd>20161205</metd>
+    <metc>
+      <cntinfo>
+        <cntperp>
+          <cntper>Richard B. Winston</cntper>
+          <cntorg>U.S. Geological Survey</cntorg>
+        </cntperp>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>12201 Sunrise Valley Dr</address>
+          <city>Reston</city>
+          <state>Va</state>
+          <postal>20192</postal>
+          <country>USA</country>
+        </cntaddr>
+        <cntvoice>703 648 5988</cntvoice>
+        <cntemail>rbwinst@usgs.gov</cntemail>
+      </cntinfo>
+    </metc>
+    <metstdn>Content Standard for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001-1998</metstdv>
+  </metainfo>
+  <spdoinfo/>
+  <spref/>
+</metadata>

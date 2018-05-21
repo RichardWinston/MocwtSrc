@@ -1,0 +1,262 @@
+C *******************************************************************
+C
+C  SOLUTE SINK/SOURCES AT SPECIFIED FLOW BOUNDARIES (FHB)
+C  
+C     ***************************************************************
+C
+      SUBROUTINE GWT1FHBF1BD(IFLLOC,BDFV,NFLW,IFHBD4,NFHBX1,IFHBFC,
+     *  IBOUND,NCOL,NROW,NLAY,KSTP,KPER,IPERGWT,
+     *  SRCFLO,SRCSOL,SNKFLO,
+     *  NSCOL,NSROW,NSLAY,IOUTS,ICONLY,
+     *  VC,VR,VL,IFACEC)
+C
+C     ***************************************************************
+      DIMENSION VC(NSCOL+1,NSROW,NSLAY),VR(NSCOL,NSROW+1,NSLAY),
+     *   VL(NSCOL,NSROW,NSLAY+1)  
+      CHARACTER*8 PACKAGE
+C
+      DIMENSION BDFV(IFHBD4,NFLW),IFLLOC(4,NFLW)
+      DIMENSION IBOUND(NCOL,NROW,NLAY),
+     *  SRCFLO(NSCOL,NSROW,NSLAY),SRCSOL(NSCOL,NSROW,NSLAY),
+     *  SNKFLO(NSCOL,NSROW,NSLAY)
+      COMMON /FHBCOM/ FHBXNM(10),FHBXWT(10)
+      CHARACTER*16 FHBXNM
+C
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+C     ***************************************************************
+C
+C RETURN IF NOT SOLVING TRANSPORT YET
+      IF(KPER.LT.IPERGWT) RETURN
+C  CFHB1FM  FIND OUT WHICH OF THE FHB AUXILIARY PARAMETERS IS CONC
+C  IF NOT FOUND, AND FHB CELLS ARE WITHIN SUBGRID, THEN WARN  
+C
+C  SET POINTER TO CONCENTRATION DATA FOR FHB
+C  SET POINTER TO IFACE VALUE FOR FHB
+      IF(KPER.EQ.IPERGWT.AND.KSTP.EQ.1) THEN
+         IFHBFC=0
+         IF(NFHBX1.GT.0) THEN
+            DO 8 IAUX=1,NFHBX1
+               IF(FHBXNM(IAUX).EQ.'CONCENTRATION'.OR.
+     *            FHBXNM(IAUX).EQ.'CONC') THEN
+                  IFHBFC=IAUX
+               END IF
+               IF(FHBXNM(IAUX).EQ.'IFACE') THEN
+                  IFACEC=IAUX
+               END IF
+ 8          CONTINUE
+         END IF
+         IF(IFHBFC.EQ.0) WRITE(IOUTS,*) ' WARNING, ',
+     *         'NO CONCENTRATION DATA READ',
+     *         ' FOR FHB FLOW NODES'
+         IF(IFACEC.EQ.0) WRITE(IOUTS,*) ' IFACE NOT DEFINED: ALL ' 
+     *         ,'FHB FLOW CELLS APPLIED AS DISTRIBUTED SOURCES/SINKS'
+      END IF
+C
+C  RETURN IF NO ACTIVE FHB NODES THIS PERIOD
+      IF(NFLW.LE.0) RETURN
+C
+C5------PRINT FHB FLOW CONCENTRATIONS AND FORMULATE
+C        SINK AND SOURCE TERMS FOR TRANSPORT
+      IFHBSG=0
+      IERSRC=0
+      ITHKSG=0
+      IPRNT=0
+      DO 10 L=1,NFLW
+         K=IFLLOC(1,L)
+         KS=K-ISLAY1+1
+         IF(KS.LT.1.OR.KS.GT.NSLAY) GO TO 10
+         I=IFLLOC(2,L)
+         IS=I-ISROW1+1
+         IF(IS.LT.1.OR.IS.GT.NSROW) GO TO 10
+         J=IFLLOC(3,L)
+C  SKIP FHB IN FIXED HEAD CELLS
+         IF(IBOUND(J,I,K).LE.0) THEN
+           ITHKSG=ITHKSG+1
+           GO TO 10
+         ENDIF
+         JS=J-ISCOL1+1
+         IF(JS.LT.1.OR.JS.GT.NSCOL) GO TO 10
+         IF(KSTP.EQ.1) THEN
+           IF(IFACEC.LE.0) THEN
+             IF(IFHBFC.LE.0) THEN
+               IF(IPRNT.EQ.0) WRITE(IOUTS,29)
+   29        FORMAT(1H ,' FHB CONCENTRATIONS FOR THIS STRESS PERIOD'/
+     1       '  ONLY FOR FHB FLOW NODES WITHIN TRANSPORT SUBGRID'//
+     2       ,2X,'FHB NO.       LAYER       ROW    COLUMN    VOL/T  '
+     3       '   SOURCE CONC   MASS/T'/1X,80('-'))
+               IPRNT=1
+               WRITE(IOUTS,'(1X,4I10,1PE12.4)') L,K,I,J,BDFV(1,L)
+             ELSE
+               RATEC=BDFV(1,L)*BDFV(IFHBFC+2,L)
+               WRITE(IOUTS,'(1X,4I10,1P3E12.4)') L,K,I,J,BDFV(1,L),
+     *          BDFV(IFHBFC+2,L),RATEC
+             END IF
+           ELSE
+             IF(IFHBFC.LE.0) THEN
+               IF(IPRNT.EQ.0) WRITE(IOUTS,129)
+  129        FORMAT(1H ,' FHB CONCENTRATIONS FOR THIS STRESS PERIOD'/
+     1       '  ONLY FOR FHB FLOW NODES WITHIN TRANSPORT SUBGRID'//
+     2       ,2X,'FHB NO.       LAYER       ROW    COLUMN    VOL/T  '
+     3       '   IFACE'/1X,80('-'))
+               IPRNT=1
+               WRITE(IOUTS,'(1X,4I10,1PE12.4,I10)') L,K,I,J,BDFV(1,L),
+     *           BDFV(IFACEC+2,L)
+             ELSE
+               IF(IPRNT.EQ.0) WRITE(IOUTS,229)
+  229        FORMAT(1H ,' FHB CONCENTRATIONS FOR THIS STRESS PERIOD'/
+     1       '  ONLY FOR FHB FLOW NODES WITHIN TRANSPORT SUBGRID'//
+     2       ,2X,'FHB NO.       LAYER       ROW    COLUMN    VOL/T  '
+     3       '   SOURCE CONC   MASS/T    IFACE'/1X,90('-'))
+               IPRNT=1
+               RATEC=BDFV(1,L)*BDFV(IFHBFC+2,L)
+               WRITE(IOUTS,'(1X,4I10,1P3E12.4,I10)') L,K,I,J,BDFV(1,L),
+     *          BDFV(IFHBFC+2,L),RATEC,BDFV(IFACEC+2,L)
+             END IF
+           END IF
+         END IF
+C
+         IF(ICONLY.EQ.1) THEN
+            IFHBSG=IFHBSG+1
+         ELSE
+            RATE=BDFV(1,L)      
+            IFACE=0
+            IF(IFACEC.GT.0) IFACE=BDFV(IFACEC+2,L)
+            IF(IFACE.LT.0) IFACE=-1
+            IF(IFACE.NE.0) THEN
+              PACKAGE='FHB FLOW'
+              IPCK=L
+              CALL GWT1BFLX5PCK(IFACE,IBOUND,RATE,PACKAGE,IPCK,
+     *         VC,VR,VL,
+     *         NCOL,NROW,NLAY,NSCOL,NSROW,NSLAY,
+     *         IOUTS,
+     *         J,I,K,JS,IS,KS)
+            END IF
+            IF(RATE.LT.0.0) THEN
+               SNKFLO(JS,IS,KS)=SNKFLO(JS,IS,KS)+RATE
+            ELSE IF(RATE.GT.0.0) THEN
+               IF(IFHBFC.LE.0) THEN
+                 IERSRC=IERSRC+1
+               ELSE
+                 SRCFLO(JS,IS,KS)=SRCFLO(JS,IS,KS)+RATE
+                 RATEC=RATE*BDFV(IFHBFC+2,L)
+                 SRCSOL(JS,IS,KS)=SRCSOL(JS,IS,KS)+RATEC
+               END IF
+            END IF
+         END IF
+   10 CONTINUE
+C
+C  STOP IF FHB WITHIN TRANSPORT SUBGRID AND ICONLY=1
+      IF(IFHBSG.GT.0) THEN
+         WRITE(IOUTS,*) ' ERROR,',IFHBSG,' FHB NODES WITHIN',
+     *      ' SUBGRID, BUT ICONLY=1, STOPPING'
+         STOP
+      END IF
+C  STOP IF SOURCE FHB NODE WITHIN SUBGRID, BUT NO CONC DATA
+      IF(IERSRC.GT.0) THEN
+         WRITE(IOUTS,*) ' ERROR:',IERSRC,' SOURCE FHB NODES',
+     *     ' WITHIN SUBGRID, BUT NO CONCENTRATION DATA, STOPPING'
+         STOP
+      END IF
+C  WARN IF FHB NODE WITHIN SUBGRID, BUT NO FLOW ASSOC WITH IT
+      IF(ITHKSG.GT.0) THEN
+         WRITE(IOUTS,*) ' WARNING:',ITHKSG,' FHB NODES',
+     *     ' SKIPPED WITHIN SUBGRID (IBOUND <= 0)'
+      END IF
+C
+      RETURN
+      END
+C
+C *******************************************************************
+C
+C  SOLUTE SINK/SOURCES AT SPECIFIED HEAD BOUNDARIES (FHB)
+C  
+C     ***************************************************************
+C
+      SUBROUTINE GWT1FHBH1FM(IHDLOC,BDHV,NHED,NFHBX2,IFHBHC,CFXHBC,
+     *  NCOL,NROW,NLAY,KSTP,KPER,IPERGWT,
+     *  NSCOL,NSROW,NSLAY,IOUTS,ICONLY)
+C
+C     ***************************************************************
+C
+      DIMENSION BDHV(NFHBX2,NHED),IHDLOC(4,NHED)
+      DIMENSION CFXHBC(NSCOL,NSROW,NSLAY)
+      COMMON /FHBCOM/ FHBXNM(10),FHBXWT(10)
+      CHARACTER*16 FHBXNM
+C
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+C     ***************************************************************
+C
+C  RETURN IF NO ACTIVE FHB NODES THIS PERIOD
+      IF(NHED.LE.0) RETURN
+C  CFHB1FM  FIND OUT WHICH OF THE FHB AUXILIARY PARAMETERS IS CONC
+C  IF NOT FOUND, AND FHB CELLS ARE WITHIN SUBGRID, THEN WARN  
+C
+C  SET POINTER TO CONCENTRATION DATA FOR FHB
+      IF(KPER.EQ.IPERGWT.AND.KSTP.EQ.1) THEN
+         IFHBHC=0
+         IF(NFHBX2.GT.0) THEN
+            DO 18 IAUX=1,NFHBX2
+               IF(FHBXNM(IAUX+5).EQ.'CONCENTRATION'.OR.
+     *            FHBXNM(IAUX+5).EQ.'CONC') THEN
+                  IFHBHC=IAUX
+                  GOTO 19
+               END IF
+ 18         CONTINUE
+            WRITE(IOUTS,*) ' WARNING, NO CONCENTRATION DATA READ',
+     *         ' FOR FHB HEAD NODES'
+         ELSE
+            WRITE(IOUTS,*) ' WARNING, NO CONCENTRATION DATA READ',
+     *         ' FOR FHB HEAD NODES'
+         END IF
+ 19   CONTINUE
+      END IF
+C
+C5------PRINT FHB FLOW CONCENTRATIONS AND FORMULATE
+C        SINK AND SOURCE TERMS FOR TRANSPORT
+      IFHBSG=0
+      IPRNT=0
+C6------PRINT FHB HEAD CONCENTRATIONS AND 
+C        INSERT THEM IN ASSOCIATIVE CONC ARRAY (CFXHBC)
+      DO 20 L=1,NHED
+         K=IHDLOC(1,L)
+         KS=K-ISLAY1+1
+         IF(KS.LT.1.OR.KS.GT.NSLAY) GO TO 20
+         I=IHDLOC(2,L)
+         IS=I-ISROW1+1
+         IF(IS.LT.1.OR.IS.GT.NSROW) GO TO 20
+         J=IHDLOC(3,L)
+         JS=J-ISCOL1+1
+         IF(JS.LT.1.OR.JS.GT.NSCOL) GO TO 20
+         IF(IPRNT.EQ.0) WRITE(IOUTS,39)
+   39       FORMAT(1H ,' FHB CONCENTRATIONS FOR THIS STRESS PERIOD'/
+     1      '  ONLY FOR FHB HEAD NODES WITHIN TRANSPORT SUBGRID'//
+     2      1H ,1X,'    FHB NO.     LAYER      ROW    COLUMN',
+     3      ' SOURCE CONC '/1X,86('-'))
+         IPRNT=1
+         IF(IFHBHC.LE.0) THEN
+            WRITE(IOUTS,'(1X,4I10,1PE12.4)') L,K,I,J
+         ELSE
+            WRITE(IOUTS,'(1X,4I10,1P2E12.4)') L,K,I,J,
+     *          BDHV(IFHBHC,L)
+         END IF
+         IF(ICONLY.EQ.1) THEN
+            IFHBSG=IFHBSG+1
+         ELSE
+            CFXHBC(JS,IS,KS)=BDHV(IFHBHC,L)
+         END IF
+   20 CONTINUE
+C
+C  STOP IF FHB WITHIN TRANSPORT SUBGRID AND ICONLY=1
+      IF(IFHBSG.GT.0) THEN
+         WRITE(IOUTS,*) ' ERROR,',IFHBSG,' FHB NODES WITHIN',
+     *      ' SUBGRID, BUT ICONLY=1, STOPPING'
+         STOP
+      END IF
+C
+      RETURN
+      END
+C

@@ -1,0 +1,152 @@
+C  GWT1CRCH5AL   RECHARGE IN SOLUTE TRANSPORT  
+C
+C     **********************************************************
+C
+      SUBROUTINE GWT1CRCH5AL(ISUM,LSCRCH,NSROW,NSCOL,
+     *                IN,IOUTS,IOUT,NRCHOP,IRCHTP)
+C
+C     ******************************************************************
+C
+C CRCH5AL   ALLOCATE SPACE IN X ARRAY FOR RECHARGE CONCENTRATION
+C
+C     ------------------------------------------------------------------
+C
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+C IF NO FILE WITH CONCENTRATIONS IN RECHARGE, STOP
+	IF(IN.EQ.0) THEN
+         WRITE(IOUTS,*) ' ERROR, CONCENTRATIONS IN RECHARGE',
+     *        ' MUST BE DEFINED (USE GWT CRCH FILE TYPE)'
+	   STOP
+	END IF
+C SKIP IF NRCHOP=1 AND NO TRANSPORT IN TOP LAYER
+      IF(NRCHOP.EQ.1.AND.ISLAY1.NE.1) THEN
+	  LSCRCH=1
+	  RETURN
+	END IF
+C
+      NSRC=NSROW*NSCOL
+      WRITE(IOUTS,10) IN
+   10 FORMAT(/,'CRCH5  --  CONCENTRATIONS IN RECHARGE INPUT READ FROM',
+     *     ' UNIT',I4)
+C     ALLOCATE SPACE FOR THE ARRAY
+      LSCRCH=ISUM
+      ISUM=ISUM+NSRC
+      WRITE(IOUT,4) NSRC
+      WRITE(IOUTS,4) NSRC
+    4 FORMAT(1X,I8,' ELEMENTS IN X ARRAY ARE USED BY RCH')
+C memory checks, lenx not needed for dynamic memory allocation
+c      ISUM1=ISUM-1
+c      WRITE(IOUT,5)ISUM1,LENX
+c    5 FORMAT(1X,I8,' ELEMENTS OF X ARRAY USED OUT OF',I8)
+c      IF(ISUM1.GT.LENX)WRITE(IOUT,6)
+c    6 FORMAT(1X,'   ***X ARRAY MUST BE MADE LARGER***')
+C
+      RETURN
+      END
+C
+C  CRCH5FM   
+C     ***************************************************************
+      SUBROUTINE GWT1RCH5BD(NRCHOP,IRCH,CRECH,
+     *  BUFF,IBOUND,SRCFLO,SRCSOL,SNKFLO,
+     *  NCOL,NROW,NLAY,
+     *  NSCOL,NSROW,NSLAY,IOUTS,IN,KSTP,ICONLY,VL,IRCHTP)
+C
+C     ***************************************************************
+C
+C  GET RECHARGE CONCENTRATION FROM GWT "CRCH" FILE, NOT IN MODFLOW RECH FILE
+C
+C        SPECIFICATIONS:
+C     ------------------------------------------------------------------
+      CHARACTER*24 ANAME(1)
+      DIMENSION
+     *    IRCH(NCOL,NROW),  
+     *    BUFF(NCOL,NROW,NLAY),IBOUND(NCOL,NROW,NLAY),
+     *  SRCFLO(NSCOL,NSROW,NSLAY),SRCSOL(NSCOL,NSROW,NSLAY),
+     *  SNKFLO(NSCOL,NSROW,NSLAY), CRECH(NSCOL,NSROW)
+C
+      DIMENSION VL(NSCOL,NSROW,NSLAY+1)  
+      COMMON /GWT/ CDEL,RDEL,CNOFLO,CELDIS,FZERO,NZCRIT
+C
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+      DATA ANAME(1) /'       CONC. IN RECHARGE'/
+C     ------------------------------------------------------------------
+C
+C     ***************************************************************
+C
+C SKIP IF NRCHOP=1 AND NO TRANSPORT IN TOP LAYER
+      IF(NRCHOP.EQ.1.AND.ISLAY1.NE.1) RETURN
+C
+C  IF ICONLY=1, OR NO CONC DATA FILE, MAKE SURE NO RECHARGE IN SUBGRID
+C
+      IF(ICONLY.EQ.1.OR.IN.EQ.0) THEN
+C
+         IRCHSG=0
+         IERSRC=0
+         IF(NRCHOP.EQ.1) KR=1
+         DO 10 IS=1,NSROW
+         I=IS+ISROW1-1
+         DO 10 JS=1,NSCOL
+            J=JS+ISCOL1-1
+            IF(NRCHOP.NE.1) KR=IRCH(J,I)
+            IF(KR.GE.ISLAY1.AND.KR.LE.ISLAY2) THEN
+               IF(BUFF(J,I,KR).NE.0.0) IRCHSG=IRCHSG+1
+               IF(BUFF(J,I,KR).GT.0.0) IERSRC=IERSRC+1
+            END IF
+ 10      CONTINUE
+         IF(IRCHSG.GT.0.AND.ICONLY.EQ.1) THEN
+            WRITE(IOUTS,*) ' ERROR,',IRCHSG,' RECHARGE NODES ARE ',
+     *          'LOCATED IN SUBGRID, BUT ICONLY=1, STOPPING'
+            STOP
+         END IF
+         IF(ICONLY.EQ.1) RETURN
+         IF(IERSRC.GT.0.AND.IN.EQ.0) THEN
+            WRITE(IOUTS,*) ' ERROR,',IERSRC,' POSITIVE RECHARGE ',
+     *          'NODES ARE LOCATED IN SUBGRID, BUT NO CONCENTRATION ',
+     *          ' DATA FOR RECHARGE, STOPPING'
+            STOP
+         END IF
+      END IF
+C
+C   READ CONCENTRATION DATA IF FIRST TIME STEP OF PERIOD
+      IF(KSTP.EQ.1.AND.IN.GT.0) THEN
+C2------READ INCRCH, FLAG TO REUSE PREVIOUS CONCENTRATIONS
+         READ(IN,*) INCRCH
+         IF(INCRCH.GE.0) THEN
+            CALL U2DREL(CRECH,ANAME(1),NSROW,NSCOL,0,IN,IOUTS)
+            WRITE(IOUTS,*) 
+         ELSE
+C2A-----IF INCRCH<0 THEN REUSE CRECH ARRAY FROM LAST STRESS PERIOD
+            WRITE(IOUTS,*) ' REUSING RECHARGE CONCENTRATIONS ',
+     *       'FROM LAST STRESS PERIOD'
+         END IF
+      END IF
+C
+      IF(NRCHOP.EQ.1) KR=1
+      DO 20 IS=1,NSROW
+      I=IS+ISROW1-1
+      DO 20 JS=1,NSCOL
+         J=JS+ISCOL1-1
+         IF(NRCHOP.NE.1) KR=IRCH(J,I)
+C  SKIP RECHARGE IN FIXED HEAD CELLS
+         IF(IBOUND(J,I,KR).LE.0) GO TO 20
+cgzh bug fix: skip rch if not in subgrid
+         IF(KR.LT.ISLAY1.OR.KR.GT.ISLAY2) GO TO 20         
+C
+         KS=KR-ISLAY1+1
+         RCHRAT=BUFF(J,I,KR)
+         IF(IRCHTP.NE.0) VL(JS,IS,KS)=VL(JS,IS,KS)+RCHRAT
+         IF(RCHRAT.LT.0.0) THEN
+            SNKFLO(JS,IS,KS)=SNKFLO(JS,IS,KS)+RCHRAT
+         ELSE IF(RCHRAT.GT.0.0) THEN
+            SRCFLO(JS,IS,KS)=SRCFLO(JS,IS,KS)+RCHRAT
+            RATEC=RCHRAT*CRECH(JS,IS)
+            SRCSOL(JS,IS,KS)=SRCSOL(JS,IS,KS)+RATEC
+         END IF
+   20 CONTINUE
+C
+      RETURN
+      END

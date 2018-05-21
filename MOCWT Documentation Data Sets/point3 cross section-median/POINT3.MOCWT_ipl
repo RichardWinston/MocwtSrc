@@ -1,0 +1,151 @@
+Point3.g2   TRANV  different transverse dispersivities for horizontal and vertical
+2d cross section along col1 of orig problem
+         1        40         2        31         1         1 ; is1, is2
+         0       0.0       0.0 ;nodisp,decay,diffus
+      0.10      0.05         1 ; celdis, fzero, intrpl
+ 0.3 0.3   94 1
+ 1 0 0 0 0 0 1                  ; npntcl, iconfm, npntvl, ivelfm, npntdl, idspfm npntpt
+    -9990.0 ; cnoflo
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0       0.0                               ; initial concentration
+         0                                         ; C' subgrid inflow
+ 0 ; nzones
+         0       0.6                               ; long disp
+         0      0.03                               ; trans disp HORIZONTAL
+         0     0.006                               ; trans disp VERTICAL
+         0       1.0                               ; Rf
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+         0      0.25                               ; porosity
+
+
+
+OLD NPTPND
+         4 ; nptpnd, NONSTANDARD relative particle coordinates follow
+       0.0     -0.25     -0.25
+       0.0      0.25     -0.25
+       0.0     -0.25      0.25
+       0.0      0.25      0.25
+       0.0-0.3333333-0.3333333
+       0.0 0.3333333-0.3333333
+       0.0-0.3333333 0.3333333
+       0.0 0.3333333 0.3333333
+       0.0       0.0       0.0
+       0.0       0.0-0.3333333
+       0.0       0.0 0.3333333
+       0.0-0.3333333       0.0
+       0.0 0.3333333       0.0
+       0.0-0.3333333-0.3333333
+       0.0 0.3333333-0.3333333
+       0.0-0.3333333 0.3333333
+       0.0 0.3333333 0.3333333
+       0.0       0.0       0.0
+       0.0       0.0-0.3333333
+       0.0       0.0 0.3333333
+       0.0-0.3333333       0.0
+       0.0 0.3333333       0.0
+OLD INITIAL CONC
+        96    1000.0(12F3.0)                     3    initial conc
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  1  1  1  1  0  0  0  0
+  0  0  0  0  1  1  1  1  0  0  0  0
+  0  0  0  0  1  1  1  1  0  0  0  0
+  0  0  0  0  1  1  1  1  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0
+  0  0  0  0  0  0  0  0  0  0  0  0

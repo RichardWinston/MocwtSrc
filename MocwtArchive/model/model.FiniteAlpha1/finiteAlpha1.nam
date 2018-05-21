@@ -1,0 +1,12 @@
+# Data read from C:\MocwtNew\testcases\Finite.1D.testcase\New\FiniteAlpha1\finiteAlpha1.nam
+# File generated on 12/9/2016 9:22:07 PM
+LIST 14 finiteAlpha1.lst
+DIS 15 finiteAlpha1.dis
+BAS6 18 finiteAlpha1.bas
+OC 19 finiteAlpha1.oc
+BCF6 20 finiteAlpha1.bcf
+SIP 21 finiteAlpha1.sip
+GWT 22 finiteAlpha1.gwt
+DATA 11 finiteAlpha1.fhd
+DATA 12 finiteAlpha1.fdn
+DATA(BINARY) 7 finiteAlpha1.bud REPLACE

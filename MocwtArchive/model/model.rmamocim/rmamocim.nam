@@ -1,0 +1,13 @@
+# Data read from C:\MocwtNew\Experiment\rmamocim\rmamocim.nam
+# File generated on 4/6/2016 12:04:46 PM
+LIST 14 rmamocim.lst
+DIS 15 rmamocim.dis
+BAS6 18 rmamocim.bas
+OC 19 rmamocim.oc
+LPF 20 rmamocim.lpf
+WEL 21 rmamocim.wel
+PCG 22 rmamocim.pcg
+GWT 23 rmamocim.gwt
+DATA 11 rmamocim.fhd
+DATA 12 rmamocim.fdn
+DATA(BINARY) 7 rmamocim.bud REPLACE

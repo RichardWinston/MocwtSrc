@@ -1,0 +1,13 @@
+# Data read from C:\MocwtNew\testcases\MOCWT Documentation Data Sets\point3\Argus\point3.nam
+# File generated on 12/9/2016 5:41:29 PM
+LIST 14 point3.lst
+DIS 15 point3.dis
+BAS6 18 point3.bas
+OC 19 point3.oc
+BCF6 20 point3.bcf
+WEL 21 point3.wel
+SIP 22 point3.sip
+GWT 23 point3.gwt
+DATA 11 point3.fhd
+DATA 12 point3.fdn
+DATA(BINARY) 7 point3.bud REPLACE

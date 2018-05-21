@@ -1,0 +1,409 @@
+in GWT1CKRP6 in GWT1main6.f, PTWTON.EQ.1 means particle weighting is on.
+ It is defined in prwt.inc
+It is set in SMOC6O in gwt1utl6.f
+
+NPCELL stores the number of particles in a cell. NPCELL can be negative 
+NPOLD stores the number of particles in a cell from the previous move.
+
+subroutine MOVEWT in move_weight.f is used for moving weighted particles.
+
+NP and NPTM are number of particles.
+
+PC, PR and PL store the location of the particle. To convert to col, row, layer, the following is used. PC, PR and PL have real numbers not integers.
+      J=PC(IP)+0.5
+      JS=J-ISCOL1+1
+      I=ABS(PR(IP))+0.5
+      IS=I-ISROW1+1
+      K=PL(IP)+0.5
+      KS=K-ISLAY1+1
+ORIGINAL PARTICLES HAVE NEGATIVE R COORDINATE
+
+PTWT stores the particle weight. It has fixed dimensions PTWT(NPMAX). It is passed as a parameter to MOVEWT.
+
+Other arrays with size NPMAX
+PC(NPMAX),PR(NPMAX),PL(NPMAX),PCONC(NPMAX),IPTID(NPMAX),PCORIG(NPMAX),PRORIG(NPMAX),PLORIG(NPMAX)
+PTWT(NPMAX)
+
+IPTID = stores particle IDs
+PCORIG, PRORIG, PLORIG = new particle locations when generating new particles?
+PTWT = stores particle weights. Weight is volume of water associated with particle.
+
+DCYT is a decay term . PCONC(IP) is multiplied by DCYT.
+DCYT2: not used
+
+PCONC(IP) is particle concentration. It is set to -888 for rewetted cells.
+PCOLD is the previous particle concentration before decay term applied
+PCNCNC is the change in concentration after the decay term applied
+
+VCRIT IS MAXIMUM RELATIVE VELOCITY MULTIPLIED BY CRITERION FOR IGNORING V CHANGE
+
+SRCFLO(j,i,k) is flow from a source?
+BDYSRC(j,i,k) is flow from a boundary?
+SS_SRC(j,i,k) is STRONG SOURCES
+RF(j,i,k) is a retardation factor?
+SRCMNW(j,i,k) is flow from a MNW2 well?
+EVTFLO(j,i,2) is layer for EVT flow
+EVTFLO(j,i,) is EVT flow itself
+SNKFLO(j,i,k) is flow to a sink?
+BDYSNK(j,i,k) is flow to a boundary?
+SINKQ IS VOLUME LEAVING CELL
+RESIDWT RESIDUAL VOLUME DUE TO A SINK AT A CELL WITH NO PARTICLES (CARRIED OVER FROM ANY PREVIOUS MOVES)
+SUMWT(JS,IS,KS) = sum of all the particle weights (volumes) in a cell.
+SUMMASS(JS,IS,KS) = sum of all the solute mass in a cell.
+QMNWSINK(j,i,k) is flow to a MNW2 well
+
+DRYMS(j,i,k) mass in inactive cells
+DRYWT(j,i,k) volume of particels in inactive cells
+particles in inactive cells are "in limbo" their locations in the PC etc. arrays can be reused. Therefore particles can't be reactivated if a inactive cell becomes active.
+
+CDEL cell dimension in column direction?
+RDEL cell dimension in row direction?
+ARINV inverse of the area of the cell.
+
+RF(j,i,k) = retardation factor
+THCK(j,i,k) = thickness of cell? (if = 0, cell is inactive)
+POR(j,i,k) = effective porosity
+
+TIMV elapsed time in transport step (time increment)
+SUM2 total solute removed in transport step
+SUM3 total volume removed in transport step
+
+ISRCFIX	Flag for implementing volume balancing in source cells designated 
+either by the value of GENCRIT or by listing in the VBAL Package.  
+If ISRCFIX = 0, the sum of particle weights in all source cells is 
+allowed to change.  
+If ISRCFIX = 1, the sum of particle weights in designated source cells 
+remains constant at the value of the fluid volume of the cell. 
+
+CUMMASS3 = cumulative mass of transported solute in all particles.
+
+VCP velocity of a particle in the column (x) direction
+VRP velocity of a particle in the row (y) direction
+TIMC time for a particle to reach a cell boundary in the column (x) direction
+TIMR time for a particle to reach a cell boundary in the row (y) direction
+TSTEP2 is the minimum of the remaining time in a time step or the time to reach a cell boundary.
+
+SS_WT(JS1,IS1,KS1) is the weight (volume) of particles in a cell that moved to a strong source cell and then removed again.
+SS_MS(JS1,IS1,KS1) is the mass of solute of particles in a cell that moved to a strong source cell and then removed again.
+
+ |||       C  IF PARTICLE IS OUTSIDE SUBGRID OR IN INACTIVE CELL,
+ |||       C    ZERO ITS COMPONENTS AND STORE
+ |||       C    ITS ID IN LIMBO SO AN "ACTIVE" PARTICLE CAN LATER USE THAT ID
+ |||         545
+
+NCROSS = COUNT OF CELL BOUNDARY CROSSINGS
+
+OLDC is the original particle coordinate in the column (x) direction. it eventually gets modified and is used to modify PC
+OLDR is the original particle coordinate in the row (Y) direction. it eventually gets modified and is used to modify PR
+OLDL is the original particle coordinate in the layer (z) direction. it eventually gets modified and is used to modify PL
+
+SBVL = ?  This array doesn't appear to be used for anything. it is updated in the subroutine but it is local to subroutine and its values never get used except of updating it.
+
+On line 1351 you have 
+PCONC(IP)=PCONC(IP)*DCYT 
+but on line 1330 you have
+PCONC(IP)=DBLE(PCONC(IP))*DCYT
+Why the difference?
+
+IGENPT(JS,IS,KS) = IGENPT=1: STRONG SOURCE, ADD A PARTICLE
+C  IGENPT=0: WEAK SOURCE, DO NOT ADD A PARTICLE, SOURCE WILL
+C    BE ACCOUNTED FOR IN NEXT LOOP OVER PARTICLES (1590 loop)
+
+FOR EACH STRONG SOURCE, ISRCID HAS SEQUENTIAL NONZERO INTEGERS 
+
+WTOUT(JS1,IS1,KS1) sum of particle weights in a cell.
+
+Loops starting on 1431 and 1475 have similar structures and may result in duplicate values. Is that a problem?
+
+JS1,IS1,KS1 current cell locations
+JS2,IS2,KS2 prior cell locations
+
+SNKMSOUT(JS1,IS1,KS1) mass of solute in a  (sink) cell
+SINKQ(JS1,IS1,KS1) = sum of particle volumes in a  (sink?) cell.
+C  SINKQ IS VOLUME LEAVING CELL AS CALCULATED BY FD METHOD
+C    PLUS RESIDUAL VOLUME (RESIDWT) DUE TO A SINK AT A CELL WITH
+C    NO PARTICLES (CARRIED OVER FROM ANY PREVIOUS MOVES)
+
+Loops starting on 1431 and 1475 have similar structures and may result in duplicate values. Is that a problem? No it isn't the same particle can't go through both loops.
+
+C  IORIG SET TO 1 FOR PARTICLES ORIGINATING (CREATED) IN THIS CELL
+C   ORIGINAL PARTICLES HAVE NEGATIVE R COORDINATE
+
+SMOC5GP: (in gwt1mov6.f) generates particle positions but doesn't work for weighted particles
+
+cgzh debug  need to go over this??  not conserving mass
+CGWT----DETERMINE INITIAL PARTICLE WEIGHTS AFTER REGEN
+PTWT1INITWT is in ptwt1.f
+         CALL PTWT1INITWT(IBOUND,PC,PR,PL,NPCELL,CELVOL,PTWT,SUMWT,
+     *     NCOL,NROW,NLAY,NSCOL,NSROW,NSLAY,NPMAX,NP,IOUTS)
+
+CELVOL is the sum of the particle weights in a cell.
+
+Does NPOLD need to be updated after SMOC5GP and PTWT1INITWT?
+
+In the following why isn't a different RANDLOC used for each coordinate direction.
+        DO 78 IDIR=1,3
+   68   CONTINUE
+        RANDLOC=RAN(ISEEDPT)
+C DON"T USE RANDOM NUMBERS THAT MAY RESULT IN ROUNDOFF ERRORS
+        IF(RANDLOC.LT.1.E-5.OR.RANDLOC.GT.0.9999) GO TO 68
+cgzh debug check dimensionality here?  only do for dim-width >1
+        IF(IDIR.EQ.1) PC(IPN)=J1+RANDLOC-0.5
+        IF(IDIR.EQ.2) PR(IPN)=-I1-RANDLOC+0.5
+        IF(IDIR.EQ.3) PL(IPN)=K1+RANDLOC-0.5
+   78   CONTINUE
+
+
+C FOR NEW PARTICLES AT SUBGRID BOUNDARY OR BFLX FACE PLACE PT ACCORDING
+C TO MAGNITUDE OF VELOCITY OF SUBGRID FACE.  IF MORE THAN ONE
+C CONTRIBUTING FACE, USE PROBABILITY FUNCTION TO PLACE PT.
+C
+C  IBDFC: SIGNIFIES NUMBER OF INFLOW BOUNDARY FACES
+C  SUMVEL: SUM OF VELO'S IN FROM BOUNDARIES, TO BE USED BY
+C          PROBABILITY FUNCTION 
+C
+C  BDFACE ARRAY SLOTS:
+C    1: 0=NOT A FACE; 1=INFLOW FACE
+C    2: NORMALIZED DISTANCE LIMITER (velocity*time/(cell-length-dimension))
+C        This is the distance the pt would travel for the full time step,
+C        normalized with the cell dimension (will be between 0 and 1, 
+C        representing fraction of cell length pt would travel)
+cgzh normalizing only works if CELDIS <= 1.0
+C    3: MAGNITUDE OF VEL ON FACE 
+C    4: LOWER BOUND FOR PROBABILITY FUNCTION
+C    5: UPPER BOUND FOR PROBABILITY FUNCTION
+C
+C  JS1,IS1,KS1 is original cell
+C  Velocity components are checked on the outside (subgrid) face
+C    (remember that velo is stored on faces)
+C
+C  These six checks look for a positive inflow from the boundary face
+C  BDFACE(I,1) is set to 1 (TRUE) if there is flow in 
+C  BDFACE(I,2) is set to normalized distance limiter 
+
+I=1: left face
+I=2: right face
+I=3: upper row face
+I=4: lower row face
+I=5: upper layer face
+I=6: lower layer face
+
+SRCAVC(JS1,IS1,KS1) average source concentration at a cell.
+SUMSGMS(JS2,IS2,KS2) sum of transported solute in cells where particle exists the subgrid
+SUMSGWT(JS2,IS2,KS2) sum of particle weights in cells where particle exists the subgrid
+
+WTIN(JS,IS,KS) = sum of particle weights in cell
+
+line 1515: is this where the change needs to be made?
+        write(*,*)
+        STOP 'NPMAX EXCEEDED IN MOVEWT'
+C
+cgzh varpt  this not set up for variable point distributions
+        CALL SMOC5GP(PC,PR,PL,PCONC,
+     *                 CONC,IPTID,NPCELL,
+     *   IBOUND,PNEWC,PNEWR,PNEWL,LIMBO,
+     *   NCOL,NROW,NLAY,NSCOL,NSROW,NSLAY,
+     *   NEWPTS,NPMAX,NLIMBO,
+     *   IOUTS,NP,WTFAC)
+
+
+IBDFC: SIGNIFIES NUMBER OF INFLOW BOUNDARY FACES
+SUMVEL: SUM OF VELO'S IN FROM BOUNDARIES, TO BE USED BY PROBABILITY FUNCTION 
+
+C  BDFACE ARRAY SLOTS:
+C    1: 0=NOT A FACE; 1=INFLOW FACE
+C    2: NORMALIZED DISTANCE LIMITER (velocity*time/(cell-length-dimension))
+C        This is the distance the pt would travel for the full time step,
+C        normalized with the cell dimension (will be between 0 and 1, 
+C        representing fraction of cell length pt would travel)
+cgzh normalizing only works if CELDIS <= 1.0
+C    3: MAGNITUDE OF VEL ON FACE 
+C    4: LOWER BOUND FOR PROBABILITY FUNCTION
+C    5: UPPER BOUND FOR PROBABILITY FUNCTION
+C  JS1,IS1,KS1 is original cell
+C  Velocity components are checked on the outside (subgrid) face
+C    (remember that velo is stored on faces)
+C
+C  These six checks look for a positive inflow from the boundary face
+C  BDFACE(I,1) is set to 1 (TRUE) if there is flow in 
+C  BDFACE(I,2) is set to normalized distance limiter 
+
+RBW Where is BDFACE initialized?
+
+SNKMSOUT(JS1,IS1,KS1) mass of solute in a cell
+SINKQ(JS1,IS1,KS1) = sum of particle volumes in a cell.
+C  SINKQ IS VOLUME LEAVING CELL AS CALCULATED BY FD METHOD
+C    PLUS RESIDUAL VOLUME (RESIDWT) DUE TO A SINK AT A CELL WITH
+C    NO PARTICLES (CARRIED OVER FROM ANY PREVIOUS MOVES)
+C
+C    IF SINKQ = 0, DO NOT ADJUST PARTICLE WEIGHTS
+C    IF SINKQ < 0, THEN VOLUME WILL BE REMOVED FROM PARTICLES
+C    IF SINKQ > 0, THEN VOLUME WILL BE ADDED TO PARTICLES
+C    IF NO PARTICLES, ADD TO RESIDUAL AND ATTEMPT TO APPLY IT NEXT MOVE
+
+
+C  IGENPT=1: STRONG SOURCE, ADD A PARTICLE
+C  NO SINK/SOURCES IF ICONLY=1
+ICONLY is a parameter passed into MOVEWT.
+C  ICONLY=1  NO SOLUTE SOURCES DURING SIMULATION, ONLY TRANSPORT OF 
+C            INITIAL CONDITION
+C  ICSTRT=1  INITIAL CONC WILL BE SAVED SO THAT CHANGE IN CONC MAY BE 
+C            PRINTED
+C    ICONLY IS SET TO 0 IN CODE; USER MUST CHANGE ICONLY IN CODE AND 
+C       RECOMPILE TO USE THIS OPTION
+C    ICSTRT IS HANDLED THE SAME WAY AS ICONLY; USER MUST ALSO ADD 
+C       CODE TO PRINT THE CHANGE IN CONC; INITIAL CONC SAVED IN 
+C       ARRAY NAMED "CONINT"
+
+
+CUMMASS = all the solute mass in all the cells together
+SMCELL(JS1,IS1,KS1) mass of solute in a cell
+
+SOURCEQ(JS,IS,KS) = flow into cell from sources?
+SINKQ(JS,IS,KS) = flow out of cell to sinks?
+
+SRCFAC STORES INFO ON STRONG SOURCES FOR PARTICLE GENERATION WITH VOLUME FIX
+C SRCFAC(MAXSRC,6,3)
+C   MAXSRC = ID FOR STRONG SOURCE CELLS
+C   6: values for each cell face
+C   3rd spot: (1) = cumulative probability (0.0-1.0) normalized to total flux out
+C   3rd spot: (2) = distance particle will move over 1/2 TIMV 
+C                     due to flux across that face
+C   3rd spot: (3) = cumulative probability (0.0-1.0) normalized to total flux in
+
+RBW ET package gets special treatment. (It removes water but not solute.) What about ETS package and maybe UZF package.
+
+RBW Should the following be removed?
+cgzh debug skipping 4th loop
+      GO TO 8888
+
+C SGMSOUT  = Mass removed from particles in this cell due to flux out via subgrid
+C SNKMSOUT = Mass removed this cell by fluid sinks.
+C   NEGATIVE VALUE SIGNIFIES LEAVING AQUIFER
+
+RBW How should ilump be handled.
+C  LUMP PARTICLES WITH LOW WEIGHTS IN CELLS THE HAD PTS CREATED BY SRCFIX
+C  CRITWT IS FRACTION (REMCRIT) OF SUM OF PARTICLE WEIGHTS IN CELL  
+C  CRITMS IS FRACTION (REMCRIT) OF SUM OF PARTICLE MASSES IN CELL  
+C  (REMCRIT) --> SET BY USER
+cgzh debug ilump=0 off, ilump=1 on
+      ilump=1
+
+RBW This will have to be removed eventually.
+cgzh debug output
+                    write(55,*) 'pt lumped in cell is,ks,imov',
+     *                is,ks,imov
+
+AVC(JS,IS,KS)= used to calculate average X (column) coordinate of particle being removed.
+AVR(JS,IS,KS)=used to calculate average Y (row) coordinate of particle being removed.
+AVL(JS,IS,KS)=used to calculate average Z (layer) coordinate of particle being removed.
+NPNEW(JS,IS,KS)= number of particles being removed.
+
+INDK unit number for Decay package?
+
+LIST2 has particle numbers of particles that went to a strong source from a cell
+that is not a strong source
+
+LIST has particle numbers of particles that moved from a strong source cell
+LIST is used with volume balancing.
+
+C  NLOC=1 IF PARTICLE LEFT SUBGRID
+
+C  DCC = DISPCC, ETC.
+C  PC = PC (PARTICLE C LOCATION), ETC.
+C  PCON = PARTICLE CONCENTRATION
+C  PTID = IPTID = PARTICLE ID'S (STARTING LOC)
+C  LMBO = LIMBO
+C  IGNP = IGENPT, IF IGENPT(JS,IS,KS)=1, TREAT AS "STRONG" SINK/SOURCE FOR
+C          PARTICLE REGENERATION AND REMOVAL (SAME AS IBOUND=-1, FIXED 
+C          HEADS)
+C  RF   = RETARDATION
+C  CINT = CONINT
+C  CHBC = CFXHBC = CONC AT FIXED HEAD BC'S, DIMENSIONED FOR SUBGRID
+C  CINF = CINFL  = CONC OF INFLOW AT SUBGRID BOUNDARIES
+C  SRCC = SRCSOL = MASS FLUX AT SOURCES
+C  SRCF = SRCFLO = FLUID FLUX AT SOURCES
+C  SNKF = SNKFLO = FLUID FLUX AT SINKS
+C  CTCF = CTCFLO = CELL TO CELL FLUXES
+C  LBDY = LOCBDY = LOCATION OF BOUNDARY WALLS OF SUBGRID
+C  CHDF = CHDFLO = CONSTANT HEAD FLUXES
+C  NPCL = NPCELL
+C  NPLD = NPOLD
+C  ALNG = LONGITUDINAL DISPERSIVITY
+C  ATRN = TRANSVERSE DISPERSIVITY
+C  VC   = VCBDY, ETC.
+C  POR  = POROSITY, BY NODE
+C  THCK = THICKNESS IN VERTICAL DIRECTION, BY NODE
+C  CRCH = CONCENTRATION IN RECHARGE
+C  SUMC = SUM OF CONCENTRATIONS OF PARTICLES IN CELL
+C  CAVG = AVERAGE CONCENTRATION OF PARTICLES IN CELL
+C  CNCN = CNCNC = CHANGE IN CONCENTRATION IN CELL
+C  COLD = CNOLD = OLD CONCENTRATION IN CELL
+C  PNWC = PNEWC, RELATIVE C LOCATION IN CELL OF NEW PARTICLES (NEWPTS)
+C  PNWR = SAME FOR ROWS, ETC.
+cellam
+C  CB   = CBNDY = CONCENTRATION AT BOUNDARY NODES
+C  LB   = LBNDY = INFLOW, OUTFLOW OR NOFLOW BNDY INFO
+C  IDB  =IDBNDY = INFLOW, OUTFLOW OR NOFLOW BNDY INFO
+C  A    = A     = MATRIX ENTRIES: INCL. STORAGE + DISP + SOURCE COEFFS
+C  IA   = IA    = ROW INDEX OF MATRIX ENTRY
+C  JA   = JA    = COL INDEX OF MATRIX ENTRY
+C  AS   = AS     = MATRIX OF STORAGE COEFFS ONLY: USED FOR MASS BALANCE
+C  IAS  = IAS   = ROW INDEX OF STORAGE MATRIX ENTRY
+C  JAS  = JAS   = COL INDEX OF STORAGE MATRIX ENTRY
+C  RHS  = RHS = RIGHT HAND SIDE
+C  RHSO = RHSO = RIGHT HAND SIDE OUTFLOW
+C  DO   = DIAGO = OUTFLOW MATRIX DIAGONAL
+C  NONU = NONU  = NODE TO WHICH BNDY MASS IS ACCUMULATED,BDY FACE NBR
+C  SAV  = SAV = COEFF FOR OUTFLOW BOUNDARY CONC, OR RHS FROM INFLOW
+C  XFOR = XFOR = COL WIDTH RATIO IN FORW DIRECTION
+C  XBAC = XBAC = COL WIDTH RATIO IN BACK DIRECTION
+C  YFOR = YFOR = ROW WIDTH RATIO IN FORW DIRECTION
+C  YBAC = YBAC = ROW WIDTH RATIO IN BACK DIRECTION
+C  CFOR = CFOR = COL WIDTH RATIO IN FORW DIRECTION W/ ACT/INACT
+C  RFOR = RFOR = ROW WIDTH RATIO IN FORW DIRECTION W/ ACT/INACT
+C  TFOR = TFOR = LAY WIDTH RATIO IN FORW DIRECTION W/ ACT/INACT
+C  CONL = CONLAY=OLD TIME CONC AT OCTANT CORNERS FOR SINGLE LAYER
+C  VOL  = VOL  = OCTANT VOLS (ZERO IF INACT) FOR SINGLE LAYER
+C  IACT = IACT = 0/1 INDICTOR OF ACTIVE STATUS FOR SINGLE LAYER
+C  NZIN = NZIN = 0/1 INDICATOR OF WHETHER TOTAL MASS IN CELL IS ZERO
+C  IW   =        INTEGER WORK ARRAY FOR SOLVER
+C  RW   =        REAL WORK ARRAY FOR SOLVER AND MASS BALANCE
+C  IGLK = LAKE ID ARRAY
+C  XDMA = mask for imp disp routine
+C  CBDY = C' inflow above and below subgrid
+C  MNWI = MNW Id array (0 = simple, 1 = complex (flow in and out)
+C  SRCM = SRCMNW = FLUX AT MNW SOURCES
+C  SOLM = SOLMNW = MASS FLUX AT MNW SOURCES
+C  SNKM = SNKMNW = FLUID FLUX AT MNW SINKS
+C  WTFC = WTFAC = FACTOR FOR ADJUSTING K LOCATION OF PTS IN WT CELLS
+--
+C  CELV = CELVOL = VOLUME OF CELL 
+C  PTWT = WEIGHT OF PARTICLE (CELVOL/NPCELL)
+C  SUMW = SUMWT = SUM OF WEIGHTS IN CELL
+C  SRCC = SRCAVC = AVERAGE SOURCE CONCENTRATION AT CELL
+C  BSRC = BDYSRC = SOURCE FLUX FROM SUBGRID BOUNDARY
+C  BSNK = BDYSNK = SINK FLUX FROM SUBGRID BOUNDARY
+C  BSOL = BDYSOL = MASS FLUX FROM SOURCE AT SUBGRID BOUNDARY
+C  SGMS = SUMSGMS = SUM OF SOLUTE FLUX ON PARTICLES LEAVING THE SUBGRID AT CELL
+C  SGWT = SUMSGWT = SUM WEIGHTS OF PARTICLES LEAVING THE SUBGRID AT CELL
+C  BFMS = SUMBFMS = SUM OF SOLUTE FLUX ON PARTICLES LEAVING VIA BOUNDARIES
+C  BFWT = SUMBFWT = SUM WEIGHTS OF PARTICLES LEAVING VIA BOUNDARIES
+C  RESW = RESIDWT = DISCHARGE NOT ACCOUNTED FOR ON PARTICLES FROM LAST MOVE
+C  RESC = RESIDC = CONCENTRATION OF PTS THAT LEFT THE SUBGRID BUT WEREN'T ACCOUNTED FOR
+C  ISRC = ISRCID = LOCATOR FOR STRONG SOURCES FOR PARTICLE LIST
+C  _SRC = SS_SRC = SOURCE FLUX INTO A STRONG SOURCE FROM ANOTHER STRONG SOURCE
+C  _SNK = SS_SNK = SINK FLUX OUT OF A STRONG SOURCE INTO ANOTHER STRONG SOURCE
+C  _SOL = SS_SOL = MASS SRC FLUX OUT OF A STRONG SOURCE INTO ANOTHER STRONG SOURCE
+C  SOL =    SOL =  MASS FROM BDY AND SRCS
+
+PTFLAG controls the method used to change the concentration.
+	-2 PROPORTIONAL DECREASE WITH BASE=CMIN (used when concentration in the cell is greater than the minimum concentration in the surrounding cells and a proportional decrease would not result in a negative concentration)
+	-1 PROPORTIONAL DECREASE WITH BASE=0.0 (used when concentration in the cell is less than or equal to the minimum concentration in the surrounding cells or when a proportional decrease based on cmmin would result in a negative concentration)
+	
+	IF DISPERSION INCREASES CONCENTRATION AT CELL,
+    CALCULATE PERCENTAGE ADJUSTMENT BASED ON NORMALIZED
+    RANGE AMONG ADJACENT CELLS; CALCULATE Cx FACTOR
+
+	1 ARITHMETIC INCREASE/DECREASE (used when a proportional change would result in a negative concentration or the concentration is already negative)
+	2 PROPORTIONAL INCREASE WITH CMAX

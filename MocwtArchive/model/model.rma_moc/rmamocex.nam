@@ -1,0 +1,13 @@
+# Data read from C:\MocwtNew\Experiment\gwt\rma_moc\rmamocex.nam
+# File generated on 11/17/2016 5:30:46 PM
+LIST 14 rmamocex.lst
+DIS 15 rmamocex.dis
+BAS6 18 rmamocex.bas
+OC 19 rmamocex.oc
+LPF 20 rmamocex.lpf
+WEL 21 rmamocex.wel
+PCG 22 rmamocex.pcg
+GWT 23 rmamocex.gwt
+DATA 11 rmamocex.fhd
+DATA 12 rmamocex.fdn
+DATA(BINARY) 7 rmamocex.bud REPLACE

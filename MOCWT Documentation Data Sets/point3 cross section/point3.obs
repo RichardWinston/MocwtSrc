@@ -1,0 +1,6 @@
+  5  1        ;NUMOBS  IOBSFL     Observation well data
+  1  8  1  45 ;layer, row, column, unit number
+  7  8  1  45 ;layer, row, column, unit number
+ 11  8  1  45 ;layer, row, column, unit number
+  7  6  1  45 ;layer, row, column, unit number
+ 11  6  1  45 ;layer, row, column, unit number

@@ -1,0 +1,2439 @@
+                                  MODFLOW-2000
+      U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE GROUND-WATER FLOW MODEL
+                           VERSION 1.18.01 06/20/2008
+
+
+ This model run combines GLOBAL and LIST output into this single file.
+
+ GLOBAL LISTING FILE: point3.lst
+                         UNIT   16
+
+ OPENING point3.dis
+ FILE TYPE:DIS   UNIT   90   STATUS:OLD    
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+
+ OPENING point3.ba6
+ FILE TYPE:BAS6   UNIT   95   STATUS:OLD    
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+
+ OPENING point3.oc
+ FILE TYPE:OC   UNIT   87   STATUS:OLD    
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+
+ OPENING point3.bc6
+ FILE TYPE:BCF6   UNIT   11   STATUS:OLD    
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+
+ OPENING point3.wel
+ FILE TYPE:WEL   UNIT   12   STATUS:OLD    
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+
+ OPENING point3.sip
+ FILE TYPE:SIP   UNIT   19   STATUS:OLD    
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+
+ OPENING point3.gwt
+ FILE TYPE:GWT   UNIT   91   STATUS:OLD    
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+
+ OPENING last2.txt
+ FILE TYPE:DATA   UNIT  222   STATUS:UNKNOWN
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+
+ THE FREE FORMAT OPTION HAS BEEN SELECTED
+
+ DISCRETIZATION INPUT DATA READ FROM UNIT   90
+   40 LAYERS        32 ROWS         1 COLUMNS
+    1 STRESS PERIOD(S) IN SIMULATION
+ MODEL TIME UNIT IS DAYS
+ MODEL LENGTH UNIT IS UNDEFINED
+ 
+
+              U.S. GEOLOGICAL SURVEY
+       Ground-Water Transport Process (GWT)
+         GWT (Version 2.8 BETA) 3/20/2008
+
+
+ GWT BASIC INPUT READ FROM UNIT  96
+ GWT OUTPUT ON FILE UNIT  18
+
+ THE GROUND-WATER TRANSPORT PROCESS IS ACTIVE
+
+ THE OBSERVATION PROCESS IS INACTIVE
+ THE SENSITIVITY PROCESS IS INACTIVE
+ THE PARAMETER-ESTIMATION PROCESS IS INACTIVE
+
+ MODE: FORWARD
+
+  Confining bed flag for each layer:
+   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+
+      11553  ELEMENTS OF GX ARRAY USED OUT OF      11553
+       1280  ELEMENTS OF GZ ARRAY USED OUT OF       1280
+       1280  ELEMENTS OF IG ARRAY USED OUT OF       1280
+
+                     DELR =  0.500000    
+
+                     DELC =   3.00000    
+
+ TOP ELEVATION OF LAYER 1 =   2.00000    
+
+   MODEL LAYER BOTTOM EL. =   1.95000     FOR LAYER   1
+
+   MODEL LAYER BOTTOM EL. =   1.90000     FOR LAYER   2
+
+   MODEL LAYER BOTTOM EL. =   1.85000     FOR LAYER   3
+
+   MODEL LAYER BOTTOM EL. =   1.80000     FOR LAYER   4
+
+   MODEL LAYER BOTTOM EL. =   1.75000     FOR LAYER   5
+
+   MODEL LAYER BOTTOM EL. =   1.70000     FOR LAYER   6
+
+   MODEL LAYER BOTTOM EL. =   1.65000     FOR LAYER   7
+
+   MODEL LAYER BOTTOM EL. =   1.60000     FOR LAYER   8
+
+   MODEL LAYER BOTTOM EL. =   1.55000     FOR LAYER   9
+
+   MODEL LAYER BOTTOM EL. =   1.50000     FOR LAYER  10
+
+   MODEL LAYER BOTTOM EL. =   1.45000     FOR LAYER  11
+
+   MODEL LAYER BOTTOM EL. =   1.40000     FOR LAYER  12
+
+   MODEL LAYER BOTTOM EL. =   1.35000     FOR LAYER  13
+
+   MODEL LAYER BOTTOM EL. =   1.30000     FOR LAYER  14
+
+   MODEL LAYER BOTTOM EL. =   1.25000     FOR LAYER  15
+
+   MODEL LAYER BOTTOM EL. =   1.20000     FOR LAYER  16
+
+   MODEL LAYER BOTTOM EL. =   1.15000     FOR LAYER  17
+
+   MODEL LAYER BOTTOM EL. =   1.10000     FOR LAYER  18
+
+   MODEL LAYER BOTTOM EL. =   1.05000     FOR LAYER  19
+
+   MODEL LAYER BOTTOM EL. =   1.00000     FOR LAYER  20
+
+   MODEL LAYER BOTTOM EL. =  0.950000     FOR LAYER  21
+
+   MODEL LAYER BOTTOM EL. =  0.900000     FOR LAYER  22
+
+   MODEL LAYER BOTTOM EL. =  0.850000     FOR LAYER  23
+
+   MODEL LAYER BOTTOM EL. =  0.800000     FOR LAYER  24
+
+   MODEL LAYER BOTTOM EL. =  0.750000     FOR LAYER  25
+
+   MODEL LAYER BOTTOM EL. =  0.700000     FOR LAYER  26
+
+   MODEL LAYER BOTTOM EL. =  0.650000     FOR LAYER  27
+
+   MODEL LAYER BOTTOM EL. =  0.600000     FOR LAYER  28
+
+   MODEL LAYER BOTTOM EL. =  0.550000     FOR LAYER  29
+
+   MODEL LAYER BOTTOM EL. =  0.500000     FOR LAYER  30
+
+   MODEL LAYER BOTTOM EL. =  0.450000     FOR LAYER  31
+
+   MODEL LAYER BOTTOM EL. =  0.400000     FOR LAYER  32
+
+   MODEL LAYER BOTTOM EL. =  0.350000     FOR LAYER  33
+
+   MODEL LAYER BOTTOM EL. =  0.300000     FOR LAYER  34
+
+   MODEL LAYER BOTTOM EL. =  0.250000     FOR LAYER  35
+
+   MODEL LAYER BOTTOM EL. =  0.200000     FOR LAYER  36
+
+   MODEL LAYER BOTTOM EL. =  0.150000     FOR LAYER  37
+
+   MODEL LAYER BOTTOM EL. =  0.100000     FOR LAYER  38
+
+   MODEL LAYER BOTTOM EL. =  5.000000E-02 FOR LAYER  39
+
+   MODEL LAYER BOTTOM EL. =   0.00000     FOR LAYER  40
+
+
+ STRESS PERIOD     LENGTH       TIME STEPS     MULTIPLIER FOR DELT    SS FLAG
+ ----------------------------------------------------------------------------
+        1         400.0000          1                    1.000         SS
+
+ STEADY-STATE SIMULATION
+
+
+
+
+ SIP5 -- STRONGLY IMPLICIT PROCEDURE SOLUTION PACKAGE
+                    VERSION 5, 9/1/93 INPUT READ FROM UNIT   19
+ MAXIMUM OF 200 ITERATIONS ALLOWED FOR CLOSURE
+  5 ITERATION PARAMETERS
+       5325 ELEMENTS IN X ARRAY ARE USED BY SIP
+        600 ELEMENTS IN IX ARRAY ARE USED BY SIP
+     40034033 ELEMENTS IN X ARRAY ARE USED BY GWT
+ 10006240 ELEMENTS IN IX ARRAY ARE USED BY GWT
+    12001 ELEMENTS IN X ARRAY ARE USED BY MOCWT
+    16801 ELEMENTS IN IX ARRAY ARE USED BY MOCWT
+ 29999998 ELEMENTS IN X ARRAY ARE USED BY IPDx
+
+   70051357  ELEMENTS OF X ARRAY USED OUT OF   70051357
+   10011999  ELEMENTS OF Z ARRAY USED OUT OF   10011999
+   10023661  ELEMENTS OF IX ARRAY USED OUT OF   10023661
+          0  ELEMENTS OF XHS ARRAY USED OUT OF          1
+
+
+
+          SOLUTION BY THE STRONGLY IMPLICIT PROCEDURE
+          -------------------------------------------
+ MAXIMUM ITERATIONS ALLOWED FOR CLOSURE =      200
+                 ACCELERATION PARAMETER =     1.0000    
+      HEAD CHANGE CRITERION FOR CLOSURE =    0.10000E-04
+      SIP HEAD CHANGE PRINTOUT INTERVAL =        1
+
+     5 ITERATION PARAMETERS CALCULATED FROM SPECIFIED WSEED = 0.01000000 :
+
+  0.000000E+00 0.683772E+00 0.900000E+00 0.968377E+00 0.990000E+00
+ 
+ #Point3.G2   coarse compare to wexler dat95      fixed heads     May 90         
+ THE FREE FORMAT OPTION HAS BEEN SELECTED
+   40 LAYERS        32 ROWS         1 COLUMNS
+    1 STRESS PERIOD(S) IN SIMULATION
+
+ BAS6 -- BASIC PACKAGE, VERSION 6, 1/11/2000 INPUT READ FROM UNIT   95
+        200 ELEMENTS IN IR ARRAY ARE USED BY BAS
+
+ BCF6 -- BLOCK-CENTERED FLOW PACKAGE, VERSION 6, 1/11/2000
+         INPUT READ FROM UNIT 11
+ STEADY-STATE SIMULATION
+ CELL-BY-CELL FLOWS WILL BE SAVED ON UNIT  1
+ HEAD AT CELLS THAT CONVERT TO DRY=   0.0000    
+ WETTING CAPABILITY IS NOT ACTIVE
+      LAYER  LAYER-TYPE CODE     INTERBLOCK T
+      --------------------------------------------
+         1            0          0 -- HARMONIC    
+         2            0          0 -- HARMONIC    
+         3            0          0 -- HARMONIC    
+         4            0          0 -- HARMONIC    
+         5            0          0 -- HARMONIC    
+         6            0          0 -- HARMONIC    
+         7            0          0 -- HARMONIC    
+         8            0          0 -- HARMONIC    
+         9            0          0 -- HARMONIC    
+        10            0          0 -- HARMONIC    
+        11            0          0 -- HARMONIC    
+        12            0          0 -- HARMONIC    
+        13            0          0 -- HARMONIC    
+        14            0          0 -- HARMONIC    
+        15            0          0 -- HARMONIC    
+        16            0          0 -- HARMONIC    
+        17            0          0 -- HARMONIC    
+        18            0          0 -- HARMONIC    
+        19            0          0 -- HARMONIC    
+        20            0          0 -- HARMONIC    
+        21            0          0 -- HARMONIC    
+        22            0          0 -- HARMONIC    
+        23            0          0 -- HARMONIC    
+        24            0          0 -- HARMONIC    
+        25            0          0 -- HARMONIC    
+        26            0          0 -- HARMONIC    
+        27            0          0 -- HARMONIC    
+        28            0          0 -- HARMONIC    
+        29            0          0 -- HARMONIC    
+        30            0          0 -- HARMONIC    
+        31            0          0 -- HARMONIC    
+        32            0          0 -- HARMONIC    
+        33            0          0 -- HARMONIC    
+        34            0          0 -- HARMONIC    
+        35            0          0 -- HARMONIC    
+        36            0          0 -- HARMONIC    
+        37            0          0 -- HARMONIC    
+        38            0          0 -- HARMONIC    
+        39            0          0 -- HARMONIC    
+        40            0          0 -- HARMONIC    
+       1320 ELEMENTS IN RX ARRAY ARE USED BY BCF
+
+ WEL6 -- WELL PACKAGE, VERSION 6, 1/11/2000 INPUT READ FROM UNIT   12
+ No named parameters
+ MAXIMUM OF      1 ACTIVE WELLS AT ONE TIME
+ AUXILIARY WELL VARIABLE: CONC            
+ MEMORY IS ALLOCATED FOR CELL-BY-CELL BUDGET TERMS
+          6 ELEMENTS IN RX ARRAY ARE USED BY WEL
+
+       1326  ELEMENTS OF RX ARRAY USED OUT OF       1326
+          0  ELEMENTS OF RZ ARRAY USED OUT OF          1
+        200  ELEMENTS OF IR ARRAY USED OUT OF        200
+1
+ #Point3.G2   coarse compare to wexler dat95      fixed heads     May 90         
+                                                                                 
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   1
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   2
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   3
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   4
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   5
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   6
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   7
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   8
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   9
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  10
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  11
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  12
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  13
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  14
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  15
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  16
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  17
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  18
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  19
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  20
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  21
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  22
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  23
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  24
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  25
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  26
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  27
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  28
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  29
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  30
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  31
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  32
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  33
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  34
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  35
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  36
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  37
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  38
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  39
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+
+
+                     BOUNDARY ARRAY FOR LAYER  40
+ READING ON UNIT   95 WITH FORMAT: (1I3)               
+
+ AQUIFER HEAD WILL BE SET TO  0.0000     AT ALL NO-FLOW NODES (IBOUND=0).
+
+
+
+                       INITIAL HEAD FOR LAYER   1
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER   2
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER   3
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER   4
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER   5
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER   6
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER   7
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER   8
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER   9
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  10
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  11
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  12
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  13
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  14
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  15
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  16
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  17
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  18
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  19
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  20
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  21
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  22
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  23
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  24
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  25
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  26
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  27
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  28
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  29
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  30
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  31
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  32
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  33
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  34
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  35
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  36
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  37
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  38
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  39
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+
+
+                       INITIAL HEAD FOR LAYER  40
+ READING ON UNIT   95 WITH FORMAT: (1F3.0)             
+
+ OUTPUT CONTROL IS SPECIFIED EVERY TIME STEP
+ HEAD PRINT FORMAT CODE IS  -6    DRAWDOWN PRINT FORMAT CODE IS  -3
+ HEADS WILL BE SAVED ON UNIT    0    DRAWDOWNS WILL BE SAVED ON UNIT    1
+
+ COLUMN TO ROW ANISOTROPY =   1.00000    
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER   1
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER   1
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER   2
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER   2
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER   3
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER   3
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER   4
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER   4
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER   5
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER   5
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER   6
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER   6
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER   7
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER   7
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER   8
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER   8
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER   9
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER   9
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  10
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  10
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  11
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  11
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  12
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  12
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  13
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  13
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  14
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  14
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  15
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  15
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  16
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  16
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  17
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  17
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  18
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  18
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  19
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  19
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  20
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  20
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  21
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  21
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  22
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  22
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  23
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  23
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  24
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  24
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  25
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  25
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  26
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  26
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  27
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  27
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  28
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  28
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  29
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  29
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  30
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  30
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  31
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  31
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  32
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  32
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  33
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  33
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  34
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  34
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  35
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  35
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  36
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  36
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  37
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  37
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  38
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  38
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  39
+
+ VERT HYD COND /THICKNESS =  2.500000E-02 FOR LAYER  39
+
+     TRANSMIS. ALONG ROWS =  1.250000E-03 FOR LAYER  40
+
+
+     0 Well parameters
+1
+                            STRESS PERIOD NO.    1, LENGTH =   400.0000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   400.0000    
+
+ WELL NO.  LAYER   ROW   COL   STRESS RATE         CONC            
+ ------------------------------------------------------------------
+      1      1      8      1      0.1000E-05      0.2500E+07
+
+      1 WELL
+ 
+ SOLVING FOR HEAD 
+
+     6 ITERATIONS FOR TIME STEP   1 IN STRESS PERIOD    1
+
+ MAXIMUM HEAD CHANGE FOR EACH ITERATION:
+
+    HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
+  LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
+ ----------------------------------------------------------------------
+     0.2410E-03    0.5870E-04    0.4303E-04    0.4104E-04    0.5778E-04
+  (  1,  8,  1) (  1,  9,  1) (  2,  8,  1) (  1,  9,  1) ( 40,  8,  1)
+     0.9102E-05
+  (  1,  8,  1)
+
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 0
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     1         0       1       0
+1
+              HEAD IN LAYER   1 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5004
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER   2 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5004
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER   3 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5004
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER   4 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5003
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER   5 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5003
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER   6 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5003
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER   7 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5003
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER   8 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5003
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER   9 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5003
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  10 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5003
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  11 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5002
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  12 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5002
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  13 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5002
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  14 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5002
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  15 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5002
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  16 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5002
+   9  70.5002
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  17 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5002
+   8  73.5002
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  18 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5002
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  19 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5002
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  20 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5002
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  21 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5002
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  22 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5002
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  23 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5002
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  24 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5002
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  25 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5002
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  26 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  27 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  28 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  29 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  30 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  31 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  32 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  33 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  34 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  35 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  36 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  37 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  38 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  39 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+              HEAD IN LAYER  40 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1
+ ...........
+   1  94.5000
+   2  91.5000
+   3  88.5000
+   4  85.5000
+   5  82.5001
+   6  79.5001
+   7  76.5001
+   8  73.5001
+   9  70.5001
+  10  67.5001
+  11  64.5001
+  12  61.5000
+  13  58.5000
+  14  55.5000
+  15  52.5000
+  16  49.5000
+  17  46.5000
+  18  43.5000
+  19  40.5000
+  20  37.5000
+  21  34.5000
+  22  31.5000
+  23  28.5000
+  24  25.5000
+  25  22.5000
+  26  19.5000
+  27  16.5000
+  28  13.5000
+  29  10.5000
+  30   7.5000
+  31   4.5000
+  32   1.5000
+1
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  1 IN STRESS PERIOD   1
+  ------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =          10.0000         CONSTANT HEAD =       2.5000E-02
+               WELLS =       4.0000E-04                 WELLS =       1.0000E-06
+
+            TOTAL IN =          10.0004              TOTAL IN =       2.5001E-02
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =          10.0000         CONSTANT HEAD =       2.5000E-02
+               WELLS =           0.0000                 WELLS =           0.0000
+
+           TOTAL OUT =          10.0000             TOTAL OUT =       2.5000E-02
+
+            IN - OUT =       3.5572E-04              IN - OUT =       8.9034E-07
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+
+
+
+          TIME SUMMARY AT END OF TIME STEP   1 IN STRESS PERIOD    1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.45600E+07 5.76000E+05  9600.0      400.00      1.0951    
+ STRESS PERIOD TIME 3.45600E+07 5.76000E+05  9600.0      400.00      1.0951    
+         TOTAL TIME 3.45600E+07 5.76000E+05  9600.0      400.00      1.0951    
+1

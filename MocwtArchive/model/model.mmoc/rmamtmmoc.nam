@@ -1,0 +1,13 @@
+# Data read from C:\MocwtNew\Experiment\mt3dms\mmoc\rmamtmmoc.nam
+# File generated on 4/6/2016 5:43:47 PM
+LIST 13 rmamtmmoc.lst
+DIS 14 rmamtmmoc.dis
+BAS6 15 rmamtmmoc.bas
+OC 18 rmamtmmoc.oc
+LPF 19 rmamtmmoc.lpf
+WEL 20 rmamtmmoc.wel
+PCG 21 rmamtmmoc.pcg
+#GWT 22 rmamtmmoc.gwt
+LMT6 23 rmamtmmoc.lmt
+DATA 12 rmamtmmoc.fhd
+DATA(BINARY) 11 rmamtmmoc.bud REPLACE

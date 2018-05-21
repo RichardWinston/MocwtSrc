@@ -1,0 +1,13 @@
+# Data read from C:\MocwtNew\Experiment\mt3dms\tvd\rmamttvd.mnm
+# File generated on 4/6/2016 5:05:44 PM
+LIST 7 rmamttvd.mls
+BTN 11 rmamttvd.btn
+ADV 12 rmamttvd.adv
+DSP 13 rmamttvd.dsp
+SSM 14 rmamttvd.ssm
+GCG 15 rmamttvd.gcg
+DATA 17 rmamttvd.cnf
+DATA(BINARY) 201 rmamttvA.ucn
+DATA 401 rmamttvA.mto
+DATA 601 rmamttvA.mass
+FTL 18 rmamttvd.ftl

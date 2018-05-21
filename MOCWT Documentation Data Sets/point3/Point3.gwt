@@ -1,0 +1,9 @@
+clst    18  point3.out
+#mocimp  96  point3.moc
+#mocwt  96  point3.mocwt
+mocwt  96  point3.mocwt_ipl
+IPDL   57  point3.ipl
+cnca    77  point3.cna
+prtb    37  point3.ptb
+obs    78  point3.obs
+data    45  point3.oba

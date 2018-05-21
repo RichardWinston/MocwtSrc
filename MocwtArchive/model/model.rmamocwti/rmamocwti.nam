@@ -1,0 +1,13 @@
+# Data read from C:\MocwtNew\Experiment\gwt\rmamocwti\rmamocwti.nam
+# File generated on 4/11/2016 3:15:58 PM
+LIST 14 rmamocwti.lst
+DIS 15 rmamocwti.dis
+BAS6 18 rmamocwti.bas
+OC 19 rmamocwti.oc
+LPF 20 rmamocwti.lpf
+WEL 21 rmamocwti.wel
+PCG 22 rmamocwti.pcg
+GWT 23 rmamocwti.gwt
+DATA 11 rmamocwti.fhd
+DATA 12 rmamocwti.fdn
+DATA(BINARY) 7 rmamocwti.bud REPLACE

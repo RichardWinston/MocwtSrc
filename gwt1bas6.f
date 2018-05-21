@@ -1,0 +1,2873 @@
+!  Last change: RBW, Aug. 2, 2017
+C  Support for weighted particles added.
+C---------------
+C  GENERAL GROUND WATER TRANSPORT (GWT, or MOC3D) SUBROUTINES
+C  FORCE NONZERO STORAGE FOR PACKAGES NOT USED
+C
+C  GWT1BAS6DF  DEFINE TRANSPORT PROBLEM
+C*************************************************************************
+C
+      SUBROUTINE GWT1BAS6DF(NCOL,NROW,NLAY,IOUT,IOUTS,IN,
+     *   INMOC,JUNIT, DUNIT,
+     *   NSCOL,NSROW,NSLAY,NODESS,NPMAX,NLIMBO,
+     *   NEWPTS,NUMOBS,LSOBSW,
+     *   ICSTRT,ICONLY,NODISP,DECAY,DIFFUS,NCINFL,
+     *   IABOVE,IBELOW,
+     *   IDIM,NPTPND,MOCTYPE,
+     *   IDKTIM,IDKRF,IDKZO,IDKFO,IDKZS,IDKFS,
+     *   AGER8,
+     *   IDPZO,IDPFO,IDPTIM,IDPPS,NIUNIT,
+cgzh varpt
+     *   INIPDL,INIPDA)
+C*************************************************************************
+C
+C     ******************************************************************
+C     DEFINE KEY MOC PARAMETERS
+C     ******************************************************************
+C
+C        SPECIFICATIONS:
+C     ------------------------------------------------------------------
+      CHARACTER*80 HEDMOC(2)
+      DIMENSION JUNIT(NIUNIT)
+      CHARACTER*4 DUNIT(NIUNIT)
+C
+C     ------------------------------------------------------------------
+C
+      DOUBLE PRECISION DECAY
+      COMMON /GWT/ CDEL,RDEL,CNOFLO,CELDIS,FZERO,NZCRIT
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+cellam
+      COMMON /ELLAM/ CINV,RINV,BINV,HCINV,HRINV,HBINV,WATVOL,
+     *               STINIT,ADINIT,STMASS,ADMASS,OLMASS,
+     *               AZERO,
+     *               NSC,NSR,NSL,NT,NCTF,NRTF,NLTF,
+     *               NEIGHB(8,2),NSLOPE(3),
+     *               IDTOP,IDMAX,NCOEF,NSCH,NSRH,NSLH
+cellam
+CMOCWT
+      INCLUDE 'ptwt.inc'
+C
+C************
+C
+C     OPEN FILES
+      CALL SMOC6O(IN,INMOC,IOUTS,JUNIT,DUNIT,MOCTYPE,NIUNIT)
+C1------IDENTIFY GWT PACKAGE.
+      WRITE(IOUT,1) INMOC
+      WRITE(IOUTS,2) INMOC
+    1 FORMAT(1H ,//
+     *'              U.S. GEOLOGICAL SURVEY'/
+     *'       Ground-Water Transport Process (GWT)'/
+     *'         GWT (Version 1.10) 8/2/2017'///
+     *' GWT BASIC INPUT READ FROM UNIT',I4)
+    2 FORMAT(1H ,//' GWT BASIC INPUT READ FROM UNIT',I4)
+      WRITE(IOUT,87) IOUTS
+   87 FORMAT(' GWT OUTPUT ON FILE UNIT ',I3,/)
+C
+C2------READ AND PRINT A HEADING.
+      READ(INMOC,'(A)') HEDMOC(1)
+      READ(INMOC,'(A)') HEDMOC(2)
+      WRITE(IOUTS,'(1X,/1X,A)') HEDMOC(1)
+      WRITE(IOUTS,'(1X,A,/)') HEDMOC(2)
+C
+C
+C3------READ NUMBER OF LAYERS,ROWS,COLUMNS FOR SOLUTE TRANSPORT
+C3------READ STARTING BLOCKS OF SOLUTE-TRANSPORT SUBGRID (UNIFORM XDEL 
+C       AND YDEL)
+C  ISCOL1 = COLUMN NUMBER IN FLOW GRID OF FIRST TRANSPORT COLUMN
+C  ISCOL2 = COLUMN NUMBER IN FLOW GRID OF LAST TRANSPORT COLUMN, ETC.
+C
+      READ(INMOC,*) ISLAY1,ISLAY2,ISROW1,ISROW2,ISCOL1,ISCOL2
+C
+      NSLAY=ISLAY2-ISLAY1+1
+      IF(NSLAY.LE.0) STOP ' ILLEGAL GWT SUBGRID (LAYER)'
+      NSROW=ISROW2-ISROW1+1
+      IF(NSROW.LE.0) STOP ' ILLEGAL GWT SUBGRID (ROW)'
+      NSCOL=ISCOL2-ISCOL1+1
+      IF(NSCOL.LE.0) STOP ' ILLEGAL GWT SUBGRID (COLUMN)'
+C
+      IF(ISLAY2.GT.NLAY) STOP ' ILLEGAL GWT SUBGRID (LAYER)'
+      IF(ISROW2.GT.NROW) STOP ' ILLEGAL GWT SUBGRID (ROW)'
+      IF(ISCOL2.GT.NCOL) STOP ' ILLEGAL GWT SUBGRID (COLUMN)'
+C
+C  DEFINE LIMITS FOR THE C' INFLOW ARRAY (ABOVE+NSLAY+BELOW)
+      NCINFL=0
+      IF(ISROW1.GT.1.OR.ISROW2.LT.NROW.OR.
+     *   ISCOL1.GT.1.OR.ISCOL2.LT.NCOL) NCINFL=NSLAY
+      IABOVE=0
+      IBELOW=0
+      IF (ISLAY1.GT.1) THEN  
+           NCINFL=NCINFL+1
+           IABOVE=1
+      ENDIF
+      IF (ISLAY2.LT.NLAY) THEN 
+           NCINFL=NCINFL+1
+           IBELOW=1
+      ENDIF
+C
+C
+C4------PRINT # OF LAYERS, ROWS, COLUMNS FOR SOLUTE TRANSPORT.
+      WRITE(IOUTS,6) ISLAY1,ISLAY2,ISROW1,ISROW2,ISCOL1,ISCOL2
+    6 FORMAT(5X,' MAPPING OF SOLUTE-TRANSPORT SUBGRID IN FLOW GRID:'/
+     1' FIRST LAYER FOR SOLUTE TRANSPORT =',I4,5X,
+     2' LAST LAYER FOR SOLUTE TRANSPORT  =',I4/
+     3' FIRST ROW FOR SOLUTE TRANSPORT   =',I4,5X,
+     4' LAST ROW FOR SOLUTE TRANSPORT    =',I4/
+     5' FIRST COLUMN FOR SOLUTE TRANSPORT=',I4,5X,
+     6' LAST COLUMN FOR SOLUTE TRANSPORT =',I4)
+cellam
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+        WRITE(IOUTS,5) NSLAY,NSROW,NSCOL
+      ELSE IF(MOCTYPE.EQ.3) THEN
+        WRITE(IOUTS,55) NSLAY,NSROW,NSCOL
+      ENDIF
+    5 FORMAT(/1X,'UNIFORM DELCOL AND DELROW IN SUBGRID FOR SOLUTE '
+     1 ,'TRANSPORT'//,1X,'NO. OF LAYERS = ',I4,'   NO. OF ROWS = ',I4,
+     2 '   NO. OF COLUMNS = ',I4)
+   55 FORMAT(/1X,'NONUNIFORM DELCOL AND DELROW ALLOWED '
+     1 ,'IN SUBGRID FOR SOLUTE '
+     2 ,'TRANSPORT'//,1X,'NO. OF LAYERS = ',I4,'   NO. OF ROWS = ',I4,
+     3 '   NO. OF COLUMNS = ',I4)
+C
+C  SET SUBGRID FLAG, ISUBGD=0, USE FULL FLOW GRID
+      ISUBGD=0
+      IF(NSCOL.LT.NCOL.OR.NSROW.LT.NROW.OR.NSLAY.LT.NLAY) ISUBGD=1
+C
+C  NODESS IS NUMBER OF SOLUTE-TRANSPORT BLOCKS
+      NODESS=NSCOL*NSROW*NSLAY
+C
+C  READ GENERAL SOLUTE-TRANSPORT CONDITIONS
+C  NOTE ANY FLUID SOURCE IS SOLUTE SOURCE, EVEN IF C=0
+C  NODISP=1  NO DISPERSION (OR DIFFUSION)
+C  DECAY =   DECAY RATE (1/T), SET TO ZERO FOR NO DECAY
+C  DIFFUS = MOLECULAR DIFFUSION COEFFICIENT CONSTANT IN WATER
+C
+C  ICONLY=1  NO SOLUTE SOURCES DURING SIMULATION, ONLY TRANSPORT OF 
+C            INITIAL CONDITION
+C  ICSTRT=1  INITIAL CONC WILL BE SAVED SO THAT CHANGE IN CONC MAY BE 
+C            PRINTED
+C    ICONLY IS SET TO 0 IN CODE; USER MUST CHANGE ICONLY IN CODE AND 
+C       RECOMPILE TO USE THIS OPTION
+C    ICSTRT IS HANDLED THE SAME WAY AS ICONLY; USER MUST ALSO ADD 
+C       CODE TO PRINT THE CHANGE IN CONC; INITIAL CONC SAVED IN 
+C       ARRAY NAMED "CONINT"
+C
+      NUMOBS=0
+      LSOBSW=1
+      ICONLY=0
+      ICSTRT=0
+C
+      IF(ICONLY.EQ.1) WRITE(IOUTS,8)
+      IF(ICSTRT.EQ.1) WRITE(IOUTS,34)
+   34 FORMAT(1X,' SAVE INITIAL CONCENTRATIONS')
+    8 FORMAT(' NO FLUID SOURCES--TRANSPORT OF INITIAL CONDITION ONLY'/
+     *   '   NO FLUID SOURCES ALLOWED WITHIN SOLUTE-TRANSPORT SUBGRID')
+C
+      READ(INMOC,*) NODISP,DECAY,DIFFUS
+      IF(NODISP.EQ.1.AND.MOCTYPE.EQ.2) THEN
+         WRITE(IOUTS,*) '***ERROR***  NODISP MUST = 0 FOR ',
+     *                  'GWT MOC IMPLICIT SOLVER'
+         STOP
+      ENDIF
+      IF(NODISP.EQ.1) THEN
+         WRITE(IOUTS,9)
+      ELSE
+         NODISP=0
+      END IF
+    9 FORMAT(' NO SOLUTE DISPERSION')
+      IF(DECAY.EQ.0.0) THEN
+         WRITE(IOUTS,10)
+      ELSE
+         WRITE(IOUTS,11) DECAY
+         THALF=0.6931471/DECAY
+         WRITE(IOUTS,1111) THALF
+         IF(JUNIT(11).GT.0) WRITE(IOUTS,110)
+      END IF
+   10 FORMAT(' NO SOLUTE DECAY')
+   11 FORMAT(' SOLUTE DECAY RATE (1/T), DECAY=',1PG11.5)
+ 1111 FORMAT(' DECAY HALF LIFE (T), THALF=',1PG11.5)
+  110 FORMAT('  DK PACKAGE ACTIVE, DECAY MAY BE RESET BELOW')
+      IF(DIFFUS.LE.0.0) THEN
+         DIFFUS=0.0
+         WRITE(IOUTS,12)
+      ELSE
+         WRITE(IOUTS,13) DIFFUS
+      END IF
+   12 FORMAT(' NO MOLECULAR DIFFUSION')
+   13 FORMAT(' MOLECULAR DIFFUSION CONSTANT, DIFFUS=',1PG11.5)
+C
+C  DETERMINE DIMENSIONS
+      IF(((NSLAY.EQ.1).AND.(NSROW.EQ.1)).OR.  
+     *   ((NSLAY.EQ.1).AND.(NSCOL.EQ.1)).OR.  
+     *   ((NSCOL.EQ.1).AND.(NSROW.EQ.1))) THEN 
+             IDIM=1
+      ELSEIF ((NSROW.EQ.1).OR.(NSCOL.EQ.1).OR.
+     *        (NSLAY.EQ.1)) THEN
+             IDIM=2 
+      ELSEIF ((NSLAY.GT.1).AND.(NSCOL.GT.1).AND.(NSROW.GT.1)) THEN
+             IDIM=3 
+      ENDIF
+C  FOR EXPLICIT AND IMPLICIT MOC3D
+C  READ MAXIMUM NUMBER OF PARTICLES
+C  READ NUMBER OF PARTICLES INITIALLY IN EACH CELL
+C
+cgzh varpt
+C  SKIP READING NPTPND AND NPMAX FOR IPDL AND IPDA OPTIONS
+      IF(INIPDL.GT.0.OR.INIPDA.GT.0) THEN
+cgzh newpts=2 means "nptpnd"=1; only needed for debug output I think,
+c need to check all ADDPTVAR calls and other pt stuff when ipdx is on
+        NEWPTS=2
+	  GO TO 40
+	END IF
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+       READ(INMOC,*) NPMAX,NPTPND
+C  NPMAX SETTING IS AUTOMATED IF USER SETS TO 0
+C  LIMBO ARRAY ALWAYS AUTOMATED 
+       NPGRID=ABS(NPTPND)*(NSROW*NSCOL*NSLAY)
+       IF (NPMAX.EQ.0) NPMAX=NPGRID*2
+       IF (NPMAX.EQ.0) THEN
+	   NPMAX=NPGRID*2
+	 END IF
+       NLIMBO=500
+       NTEMP=NPGRID/25
+       IF(NTEMP.GT.NLIMBO) NLIMBO=NTEMP
+C
+C  WRITE NPMAX 
+       WRITE(IOUTS,23) NPMAX
+   23 FORMAT(' MAXIMUM NUMBER OF PARTICLES (NPMAX) = ',I8)
+cellam
+C
+C  FOR ELLAM,
+C  READ NUMBER OF SPACIAL SUBINTERVALS PER CELL
+C  IN THE COL, ROW, AND LAYER DIRECTIONS AND IN TIME
+C  DEFAULT TO 4 FOR INPUT LESS THAN (OR TIME =) ZERO
+      ELSEIF (MOCTYPE.EQ.3) THEN
+       READ(INMOC,*) NSCEXP,NSREXP,NSLEXP,NTEXP
+C  WRITE NSC,NSR,NSL,NT 
+       WRITE(IOUTS,*) 
+       WRITE(IOUTS,*) 'ELLAM INPUT PARAMETERS:'
+       WRITE(IOUTS,123) NSCEXP,NSREXP,NSLEXP,NTEXP
+  123 FORMAT('  NSCEXP, NSREXP, NSLEXP, NTEXP ',/I7,2I8,I7)
+c check dimensions; use appropriate NS values
+       IF (NSCEXP.LE.0) THEN
+         IF(NSCOL.EQ.1) THEN
+           NSC=2
+         ELSE
+           NSC=4
+         ENDIF 
+       ELSE
+          NSC=2**NSCEXP
+       ENDIF
+       IF (NSREXP.LE.0) THEN
+         IF(NSROW.EQ.1) THEN
+           NSR=2
+         ELSE
+           NSR=4
+         ENDIF 
+       ELSE
+          NSR=2**NSREXP
+       ENDIF
+       IF (NSLEXP.LE.0) THEN
+         IF(NSLAY.EQ.1) THEN
+           NSL=2
+         ELSE
+           NSL=4
+         ENDIF 
+       ELSE
+          NSL=2**NSLEXP
+       ENDIF
+       IF (NTEXP.LE.0) THEN
+          NT=4
+       ELSE
+          NT=2**NTEXP
+       ENDIF
+C
+       NSCH=0.5D0*NSC
+       NSRH=0.5D0*NSR
+       NSLH=0.5D0*NSL
+C
+       NCTF=2*NSC
+       NRTF=2*NSR
+       NLTF=2*NSL
+C
+       CINV=1/REAL(NSC)
+       RINV=1/REAL(NSR)
+       BINV=1/REAL(NSL)
+       HCINV=0.5D0*CINV
+       HRINV=0.5D0*RINV
+       HBINV=0.5D0*BINV
+C  WRITE NSC,NSR,NSL,NT calculated values
+       WRITE(IOUTS,223) NSC,NSR,NSL,NT
+  223 FORMAT('  NSC, NSR, NSL,  NT (CALCULATED)',/4I5/)
+      END IF
+cellam
+C
+C  FOR EXPLICIT AND IMPLICIT MOC3D
+C  CHECK CONSISTENCY OF NPTPND WITH DIMENSIONS OF SUBGRID
+C  COMPARE NPTPND VS. IDIM                                
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+       ISTOP=0
+       IF (NPTPND.EQ.0) ISTOP=1
+       IF ((NPTPND.GT.4).AND.(NPTPND.NE.8).AND.(NPTPND.NE.9).
+     *    AND.(NPTPND.NE.16).AND.(NPTPND.NE.27))
+     *                 ISTOP=1 
+C
+       IF (NPTPND.GT.1) THEN
+C  ONE-D 
+         IF ((IDIM.EQ.1).AND.(NPTPND.GT.4)) ISTOP=1          
+C  TWO-D
+         IF ((IDIM.EQ.2).AND.(NPTPND.NE.4).AND.(NPTPND.NE.9)
+     *                  .AND.(NPTPND.NE.16))
+     *                 ISTOP=1          
+C  THREE-D 
+         IF ((IDIM.EQ.3).AND.(NPTPND.NE.8).AND.(NPTPND.NE.27))
+     *                 ISTOP=1   
+       ENDIF
+       IF (ISTOP.EQ.1) THEN
+            WRITE(IOUTS,38)
+            STOP
+       ENDIF
+   38 FORMAT(' ***ERROR*** NPTPND NOT CONSISTENT WITH SUBGRID ',
+     *'DIMENSIONS OR DEFAULT VALUES')
+C  ALLOCATE 1 EXTRA SPACE FOR NEW PARTICLES AT SINKS (CELL CENTER)
+           NEWPTS=ABS(NPTPND)+1
+      ENDIF
+C
+   40 CONTINUE
+C  READ AGING RATE
+      IF(JUNIT(9).GT.0) 
+     1    CALL AGE6DF(JUNIT(9),AGER8,IOUT,IOUTS)
+C  READ DOUBLE POROSITY OPTIONS
+      IF(JUNIT(10).GT.0)
+     1  CALL DP6DF(JUNIT(10),IDPZO,IDPFO,IDPTIM,IDPPS,IOUT,IOUTS)
+C  READ SIMPLE REACTIONS OPTIONS
+      IF(JUNIT(11).GT.0) 
+     1  CALL DK6DF(JUNIT(11),IDKTIM,IDKRF,
+     2    IDKZO,IDKFO,IDKZS,IDKFS,IOUT,IOUTS,DECAY)
+CRBW - READ VBAL FILE
+      IF (JUNIT(28).GT.0) THEN
+        CALL GWT1VBAL1AL(IOUTS, NSCOL,NSROW,NSLAY)
+        CALL GWT1VBAL1RP(IOUTS, JUNIT(28))
+      ENDIF
+
+      RETURN
+      END
+C
+C  GWT1BAS6AL  ALLOCATE SPACE IN X ARRAY FOR GWT ARRAYS
+C  ALLOCATE MINIMAL STORAGE FOR UNUSED PACKAGES
+C***************************************************************
+C
+      SUBROUTINE GWT1BAS6AL(ISUM,ISUMI,ISUMZ,
+cellam
+     *   LSCB,LSLB,
+     *   LSIDB,LSAS,LSIAS,LSJAS,LSA,LSIA,LSJA,LSIW,LSRW,
+cea
+     *   LSRW1,
+     *   LSRHSE,LSRHSO,LSDO,LSNONU,LSSAV,LSXFOR,LSXBAC,LSYFOR,LSYBAC,
+     *   LSCFOR,LSRFOR,LSTFOR,LSCONL,LSVOL,LSIACT,LSNZIN,
+     *   LSDIST,LSDIDS,NTFACE,LENW,LENIW,
+cellam
+     *   LSDCC,LSDCR,LSDCL,LSDRR,LSDRC,LSDRL,LSDLL,LSDLC,LSDLR,
+     *   LSPC,LSPR,LSPL,LSPCON,LSPTID,LSLMBO,LSIGNP,
+     *   LSRF,LSCONC,LSCINT,LSCHBC,LSCINF,
+     *   LSSRCS,LSSRCF,LSSNKF,LSTHCK,LSNPCL,LSNPLD,LSALNG,LSATH,
+     *   LSCTCF,LSCHDF,LSLBDY,LSEVTF,
+     *   LSATV,
+     *   LSVC,LSVR,LSVL,LSPOR,LSSUMC,LSCNCN,LSCOLD,LSCAVG,
+     *   LSPNWC,LSPNWR,LSPNWL,
+     *   LSCI,LSCIN,LSCIR,LSCIRL,LSCIRH,LSIND,LSMRNO,LSMRNZ,
+     *   LSRHS,LSVA,LSVAD,LSIBOU,
+     *   LSAP,LSPP,LSRA,LSRR,LSSS,LSXX,LSWW,LSWORK,
+     *   LSRS,
+     *   NCOL,NROW,NLAY,
+     *   NSCOL,NSROW,NSLAY,NPMAX,NLIMBO,NEWPTS,IOUT,IOUTS,
+     *   ICSTRT,ICONLY,NODISP,DIFFUS,NCINFL,NFACES,MOCTYPE,
+     9   INDK,IDKTIM,LSDKZO,IDKZO,LSDKFO,IDKFO,
+     2              LSDKZS,IDKZS,LSDKFS,IDKFS,
+     *   INDP,LSDPCON,LSDPRAT,LSDPPOR,
+     3   LSZODP,IDPZO,LSFODP,IDPFO,
+     *   LSIGLK,
+     *   LSXDMA,SRCDCY,LSWTFC,
+cgzh cbdy
+     *   INCBDY,LSCINA,LSCINB,LSCINXY,INMNW,
+     *   LSSRCM,LSSNKM,LSSOLM,ISSIZH)
+C
+C***************************************************************
+C
+C  DCC = DISPCC, ETC.
+C  PC = PC (PARTICLE C LOCATION), ETC.
+C  PCON = PARTICLE CONCENTRATION
+C  PTID = IPTID = PARTICLE ID'S (STARTING LOC)
+C  LMBO = LIMBO
+C  IGNP = IGENPT, IF IGENPT(JS,IS,KS)=1, TREAT AS "STRONG" SINK/SOURCE FOR
+C          PARTICLE REGENERATION AND REMOVAL (SAME AS IBOUND=-1, FIXED 
+C          HEADS)
+C  RF   = RETARDATION
+C  CINT = CONINT
+C  CHBC = CFXHBC = CONC AT FIXED HEAD BC'S, DIMENSIONED FOR SUBGRID
+C  CINF = CINFL  = CONC OF INFLOW AT SUBGRID BOUNDARIES
+C  SRCC = SRCSOL = MASS FLUX AT SOURCES
+C  SRCF = SRCFLO = FLUID FLUX AT SOURCES
+C  SNKF = SNKFLO = FLUID FLUX AT SINKS
+C  CTCF = CTCFLO = CELL TO CELL FLUXES
+C  LBDY = LOCBDY = LOCATION OF BOUNDARY WALLS OF SUBGRID
+C  CHDF = CHDFLO = CONSTANT HEAD FLUXES
+C  NPCL = NPCELL
+C  NPLD = NPOLD
+C  ALNG = LONGITUDINAL DISPERSIVITY
+C  ATRN = TRANSVERSE DISPERSIVITY
+C  VC   = VCBDY, ETC.
+C  POR  = POROSITY, BY NODE
+C  THCK = THICKNESS IN VERTICAL DIRECTION, BY NODE
+C  CRCH = CONCENTRATION IN RECHARGE
+C  SUMC = SUM OF CONCENTRATIONS OF PARTICLES IN CELL
+C  CAVG = AVERAGE CONCENTRATION OF PARTICLES IN CELL
+C  CNCN = CNCNC = CHANGE IN CONCENTRATION IN CELL
+C  COLD = CNOLD = OLD CONCENTRATION IN CELL
+C  PNWC = PNEWC, RELATIVE C LOCATION IN CELL OF NEW PARTICLES (NEWPTS)
+C  PNWR = SAME FOR ROWS, ETC.
+cellam
+C  CB   = CBNDY = CONCENTRATION AT BOUNDARY NODES
+C  LB   = LBNDY = INFLOW, OUTFLOW OR NOFLOW BNDY INFO
+C  IDB  =IDBNDY = INFLOW, OUTFLOW OR NOFLOW BNDY INFO
+C  A    = A     = MATRIX ENTRIES: INCL. STORAGE + DISP + SOURCE COEFFS
+C  IA   = IA    = ROW INDEX OF MATRIX ENTRY
+C  JA   = JA    = COL INDEX OF MATRIX ENTRY
+C  AS   = AS     = MATRIX OF STORAGE COEFFS ONLY: USED FOR MASS BALANCE
+C  IAS  = IAS   = ROW INDEX OF STORAGE MATRIX ENTRY
+C  JAS  = JAS   = COL INDEX OF STORAGE MATRIX ENTRY
+C  RHS  = RHS = RIGHT HAND SIDE
+C  RHSO = RHSO = RIGHT HAND SIDE OUTFLOW
+C  DO   = DIAGO = OUTFLOW MATRIX DIAGONAL
+C  NONU = NONU  = NODE TO WHICH BNDY MASS IS ACCUMULATED,BDY FACE NBR
+C  SAV  = SAV = COEFF FOR OUTFLOW BOUNDARY CONC, OR RHS FROM INFLOW
+C  XFOR = XFOR = COL WIDTH RATIO IN FORW DIRECTION
+C  XBAC = XBAC = COL WIDTH RATIO IN BACK DIRECTION
+C  YFOR = YFOR = ROW WIDTH RATIO IN FORW DIRECTION
+C  YBAC = YBAC = ROW WIDTH RATIO IN BACK DIRECTION
+C  CFOR = CFOR = COL WIDTH RATIO IN FORW DIRECTION W/ ACT/INACT
+C  RFOR = RFOR = ROW WIDTH RATIO IN FORW DIRECTION W/ ACT/INACT
+C  TFOR = TFOR = LAY WIDTH RATIO IN FORW DIRECTION W/ ACT/INACT
+C  CONL = CONLAY=OLD TIME CONC AT OCTANT CORNERS FOR SINGLE LAYER
+C  VOL  = VOL  = OCTANT VOLS (ZERO IF INACT) FOR SINGLE LAYER
+C  IACT = IACT = 0/1 INDICTOR OF ACTIVE STATUS FOR SINGLE LAYER
+C  NZIN = NZIN = 0/1 INDICATOR OF WHETHER TOTAL MASS IN CELL IS ZERO
+C  IW   =        INTEGER WORK ARRAY FOR SOLVER
+C  RW   =        REAL WORK ARRAY FOR SOLVER AND MASS BALANCE
+C  IGLK = LAKE ID ARRAY
+C  XDMA = mask for imp disp routine
+C  CBDY = C' inflow above and below subgrid
+C  MNWI = MNW Id array (0 = simple, 1 = complex (flow in and out)
+C  SRCM = SRCMNW = FLUX AT MNW SOURCES
+C  SOLM = SOLMNW = MASS FLUX AT MNW SOURCES
+C  SNKM = SNKMNW = FLUID FLUX AT MNW SINKS
+C  WTFC = WTFAC = FACTOR FOR ADJUSTING K LOCATION OF PTS IN WT CELLS
+      COMMON /ELLAM/ CINV,RINV,BINV,HCINV,HRINV,HBINV,WATVOL,
+     *               STINIT,ADINIT,STMASS,ADMASS,OLMASS,
+     *               AZERO,
+     *               NSC,NSR,NSL,NT,NCTF,NRTF,NLTF,
+     *               NEIGHB(8,2),NSLOPE(3),
+     *               IDTOP,IDMAX,NCOEF,NSCH,NSRH,NSLH
+cellam
+      COMMON /GWT/ CDEL,RDEL,CNOFLO,CELDIS,FZERO,NZCRIT
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+C     ******************************************************************
+C     ALLOCATE ARRAY STORAGE FOR SOLUTE-TRANSPORT PACKAGE
+C     ******************************************************************
+C
+C4------COMPUTE DIMENSIONS FOR ARRAYS.
+      NSRC=NSROW*NSCOL
+      ISSIZ=NSRC*NSLAY
+      ISSIZH=(ISSIZ/2)+1
+cellam
+c orig line      LENW=45*ISSIZ
+      IF(MOCTYPE.EQ.3) THEN
+cgzh debug (issiz not big enough??)
+        isiz=ncol*nrow*nlay
+        LENW=45*isiz
+        LENIW=32*ISSIZ
+	  NTFACE=2*(NSRC+NSLAY*(NSCOL+NSROW))
+      ELSE
+        LENW=1
+        LENIW=1
+	  NTFACE=1
+      END IF
+cellam
+C  COMPUTE NUMBER OF CELL WALLS INTO SUBGRID FOR CTCFLO
+      NSROWF=0
+      NSCOLF=0
+      NSLAYF=0
+      IF(ISROW1.GT.1) NSROWF=1
+      IF(ISROW2.LT.NROW) NSROWF=NSROWF+1
+      IF(ISCOL1.GT.1) NSCOLF=1
+      IF(ISCOL2.LT.NCOL) NSCOLF=NSCOLF+1
+      IF(ISLAY1.GT.1) NSLAYF=1
+      IF(ISLAY2.LT.NLAY) NSLAYF=NSLAYF+1
+      NFACES=NSROWF*NSCOL*NSLAY+NSCOLF*NSROW*NSLAY+NSLAYF*NSRC        
+      NFCLOC=3*NFACES
+C
+C  POINTERS TO DATA IN THE X ARRAY
+      ISOLD=ISUM
+      ISOLDI=ISUMI
+C  BASIC DATA
+      LSCONC=ISUM
+      ISUM=ISUM+ISSIZ
+      LSCINT=ISUM
+      IF(ICSTRT.EQ.1) ISUM=ISUM+ISSIZ
+      LSCOLD=ISUM
+      ISUM=ISUM+ISSIZ
+      LSCAVG=ISUM
+      ISUM=ISUM+ISSIZ
+      LSTHCK=ISUM
+      ISUM=ISUM+ISSIZ
+      LSPOR=ISUM
+      ISUM=ISUM+ISSIZ
+c rf now for entire transport subgrid
+      LSRF=ISUM
+      ISUM=ISUM+ISSIZ
+cellam
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+C  PARTICLES and zero ellam pointers
+        LSPC=ISUM
+        ISUM=ISUM+NPMAX
+        LSPR=ISUM
+        ISUM=ISUM+NPMAX
+        LSPL=ISUM
+        ISUM=ISUM+NPMAX
+        LSPCON=ISUM
+        ISUM=ISUM+NPMAX
+        LSWTFC=ISUM
+        ISUM=ISUM+ISSIZ
+c IX params for GWT
+        LSPTID=ISUMI
+        ISUMI=ISUMI+NPMAX
+        LSLMBO=ISUMI
+        ISUMI=ISUMI+NLIMBO
+        LSIGNP=ISUMI
+        ISUMI=ISUMI+ISSIZ
+c end IX
+        LSPNWC=ISUM
+        ISUM=ISUM+NEWPTS
+        LSPNWR=ISUM
+        ISUM=ISUM+NEWPTS
+        LSPNWL=ISUM
+        ISUM=ISUM+NEWPTS
+        LSNPCL=ISUMI
+        ISUMI=ISUMI+ISSIZ
+        LSNPLD=ISUMI
+        ISUMI=ISUMI+ISSIZ
+        LSSUMC=ISUMZ
+cgzh 4/28 SUMC is now double precision
+        ISUMZ=ISUMZ+ISSIZ
+c ellam (unused for moctypes 1 and 2)
+        LSCB=1
+        LSLB=1
+        LSIDB=1
+        LSAS=1
+        LSIAS=1
+        LSJAS=1
+        LSA=1
+        LSIA=1
+        LSJA=1
+        LSIW=1
+        LSRW=1
+cea
+        LSRW1=1
+        LSRHSE=1
+        LSRHSO=1
+        LSDO=1
+        LSNONU=1
+        LSSAV=1
+        LSXFOR=1
+        LSXBAC=1
+        LSYFOR=1
+        LSYBAC=1
+        LSCFOR=1
+        LSRFOR=1
+        LSTFOR=1
+        LSCONL=1
+        LSVOL=1
+        LSIBOU=1
+        LSIACT=1
+        LSNZIN=1
+        LSDIST=1
+        LSDIDS=1
+      ELSEIF(MOCTYPE.EQ.3) THEN
+C  ellam and zero PARTICLES pointers
+        LSCB=ISUM
+        ISUM=ISUM+NTFACE
+        LSAS=ISUM
+        LSDIST=ISUM
+        ISUM=ISUM+ISSIZ*27
+        LSA=ISUM
+        LSDIDS=ISUM
+        ISUM=ISUM+ISSIZ*27
+        LSRW=ISUM
+        ISUM=ISUM+LENW
+cea
+        LSRW1=ISUM
+        ISUM=ISUM+ISSIZ
+        LSRHSE=ISUM
+        ISUM=ISUM+ISSIZ
+        LSRHSO=ISUM
+        ISUM=ISUM+NTFACE
+        LSDO=ISUM
+        ISUM=ISUM+NTFACE
+        LSSAV=ISUM
+        ISUM=ISUM+32*NFACES
+        LSXFOR=ISUM
+        ISUM=ISUM+NSCOL
+        LSXBAC=ISUM
+        ISUM=ISUM+NSCOL
+        LSYFOR=ISUM
+        ISUM=ISUM+NSROW
+        LSYBAC=ISUM
+        ISUM=ISUM+NSROW
+        LSCFOR=ISUM
+        ISUM=ISUM+2*(NSRC-NSROW)
+        LSRFOR=ISUM
+        ISUM=ISUM+2*(NSRC-NSCOL)
+        LSTFOR=ISUM
+        ISUM=ISUM+NSRC
+        LSCONL=ISUM
+        ISUM=ISUM+12*NSRC-6*(NSCOL+NSROW)+3
+        LSVOL=ISUM
+        ISUM=ISUM+2*NSRC
+C  INTEGER ARRAYS (ellam)
+        LSLB=ISUMI
+        ISUMI=ISUMI+NTFACE
+        LSIDB=ISUMI
+        ISUMI=ISUMI+NFACES
+        LSIAS=ISUMI
+        ISUMI=ISUMI+27*ISSIZ
+        LSJAS=ISUMI
+        ISUMI=ISUMI+1+ISSIZ
+        LSIA=ISUMI
+        ISUMI=ISUMI+27*ISSIZ
+        LSJA=ISUMI
+        ISUMI=ISUMI+1+ISSIZ
+        LSIW=ISUMI
+        ISUMI=ISUMI+LENIW
+        LSNONU=ISUMI
+        ISUMI=ISUMI+32*NFACES
+        LSIACT=ISUMI
+        ISUMI=ISUMI+2*NSRC
+        LSNZIN=ISUMI
+        ISUMI=ISUMI+ISSIZ
+        LSIBOU=ISUMI
+        ISUMI=ISUMI+NROW*NCOL*NLAY
+C particles (unused if moctype=3)
+        LSPC=1
+        LSPR=1
+        LSPL=1
+        LSPCON=1
+        LSPTID=1
+        LSLMBO=1
+        LSIGNP=1
+        LSPNWC=1
+        LSPNWR=1
+        LSPNWL=1
+        LSNPCL=1
+        LSNPLD=1
+        LSSUMC=1
+        LSWTFC=1
+      END IF
+cellam
+C  DISPERSION
+      IF (MOCTYPE.NE.2) THEN
+             LSCI=1
+             LSCIN=1
+             LSCIR=1
+             LSCIRL=1
+             LSCIRH=1
+             LSIND=1
+             LSMRNO=1
+             LSMRNZ=1
+             LSRHS=1
+             LSVA=1
+             LSVAD=1
+             LSAP=1
+             LSPP=1
+             LSRA=1
+             LSRR=1
+             LSSS=1
+             LSXX=1
+             LSWW=1
+             LSWORK=1
+             LSRS=1
+              LSXDMA=1
+      END IF
+      LSDCC=ISUM
+      IF(NODISP.NE.1.OR.DIFFUS.NE.0.0) THEN
+         ISUM=ISUM+ISSIZ
+         LSDRR=ISUM
+         ISUM=ISUM+ISSIZ
+         LSDLL=ISUM
+         ISUM=ISUM+ISSIZ
+         LSDCR=ISUM
+         IF(NODISP.NE.1) THEN
+            ISUM=ISUM+ISSIZ
+            LSDRC=ISUM
+            ISUM=ISUM+ISSIZ
+            LSDCL=ISUM
+            ISUM=ISUM+ISSIZ
+            LSDRL=ISUM
+            ISUM=ISUM+ISSIZ
+            LSDLC=ISUM
+            ISUM=ISUM+ISSIZ
+            LSDLR=ISUM
+            ISUM=ISUM+ISSIZ
+            LSALNG=ISUM
+            ISUM=ISUM+NSLAY
+            LSATH=ISUM
+            ISUM=ISUM+NSLAY
+            LSATV=ISUM
+            ISUM=ISUM+NSLAY
+C             add arrays for implicit solver
+           IF (MOCTYPE.EQ.2) THEN
+              LSCI=ISUMI
+              ISUMI=ISUMI+(6*ISSIZ)
+              LSCIN=ISUMI
+              ISUMI=ISUMI+(6*ISSIZ)
+              LSCIR=ISUMI
+              ISUMI=ISUMI+(19*ISSIZH)
+              LSCIRL=ISUMI
+              ISUMI=ISUMI+(10*ISSIZH)
+              LSCIRH=ISUMI
+              ISUMI=ISUMI+(10*ISSIZH)
+              LSIND=ISUMI
+              ISUMI=ISUMI+(ISSIZ)
+              LSMRNO=ISUMI
+              ISUMI=ISUMI+(ISSIZ)
+              LSMRNZ=ISUMI
+              ISUMI=ISUMI+(ISSIZ)
+              LSRHS=ISUM
+              ISUM=ISUM+(ISSIZ+1)
+              LSVA=ISUM
+              ISUM=ISUM+(6*ISSIZH)
+              LSVAD=ISUM
+              ISUM=ISUM+(ISSIZ)
+              LSAP=ISUM
+              ISUM=ISUM+(ISSIZH)
+              LSPP=ISUM
+              ISUM=ISUM+(ISSIZH)
+              LSRA=ISUM
+              ISUM=ISUM+(10*ISSIZH)
+              LSRR=ISUM
+              ISUM=ISUM+(ISSIZH)
+              LSSS=ISUM
+              ISUM=ISUM+(ISSIZH)
+              LSXX=ISUM
+              ISUM=ISUM+(ISSIZH)
+              LSWW=ISUM
+              ISUM=ISUM+(ISSIZH)
+              LSWORK=ISUM
+              ISUM=ISUM+(ISSIZH)
+              LSRS=ISUM
+              ISUM=ISUM+(ISSIZ)
+              LSXDMA=ISUMI
+              NMASK=(NSCOL+2)*(NSROW+2)*(NSLAY+2)
+              ISUMI=ISUMI+NMASK
+           END IF  
+C
+         ELSE
+            LSDRC=1
+            LSDCL=1
+            LSDRL=1
+            LSDLC=1
+            LSDLR=1
+            LSALNG=1
+            LSATH=1
+            LSATV=1
+         END IF
+      ELSE
+         LSDRR=1
+         LSDLL=1
+         LSDCR=1
+         LSDRC=1
+         LSDCL=1
+         LSDRL=1
+         LSDLC=1
+         LSDLR=1
+         LSALNG=1
+         LSATH=1
+         LSATV=1
+      END IF
+C  SINK/SOURCE
+      LSSRCS=ISUM
+      IF(ICONLY.NE.1) THEN
+         ISUM=ISUM+ISSIZ
+         LSSRCF=ISUM
+         ISUM=ISUM+ISSIZ
+         LSSNKF=ISUM
+         ISUM=ISUM+ISSIZ
+         LSCHBC=ISUM
+         ISUM=ISUM+ISSIZ
+      ELSE
+         LSSRCF=1
+         LSSNKF=1
+         LSCHBC=1
+      END IF
+C  MASS BALANCE 
+      LSCTCF=ISUM
+      ISUM=ISUM+NFACES
+      LSLBDY=ISUMI
+      ISUMI=ISUMI+NFCLOC
+cgzh increased size of EVTFLO *2
+      LSEVTF=ISUM
+      ISUM=ISUM+NSRC*2
+      LSCHDF=ISUM
+      ISUM=ISUM+ISSIZ
+      LSCNCN=ISUM
+      IF(ICONLY.NE.1.OR.NODISP.NE.1.OR.DIFFUS.NE.0.0) ISUM=ISUM+ISSIZ
+C  SUBGRID INFLOW
+      LSCINF=ISUM
+      ISUM=ISUM+NCINFL
+cgzh cinxy
+      LSCINXY=ISUM
+      ISUM=ISUM+ISSIZ
+cgzh cbdy
+c cdby: always allocate, define these using old cinfl if cbdy off
+      LSCINA=ISUM
+      ISUM=ISUM+NSROW*NSCOL
+      LSCINB=ISUM
+      ISUM=ISUM+NSROW*NSCOL
+C  VELOCITIES
+      LSVC=ISUM
+      ISUM=ISUM+ISSIZ+NSROW*NSLAY
+      LSVR=ISUM
+      ISUM=ISUM+ISSIZ+NSCOL*NSLAY
+      LSVL=ISUM
+      ISUM=ISUM+ISSIZ+NSRC
+C
+C SIMPLE REACTION OPTIONS
+      IF(INDK.GT.0) THEN
+         CALL DK6AL(ISUM,LENX,NSCOL,NSROW,NSLAY,
+     2              IDKTIM,
+     3   LSDKZO,IDKZO,LSDKFO,IDKFO,
+     3   LSDKZS,IDKZS,LSDKFS,IDKFS,
+     4   INDK,IOUT,IOUTS)
+      ELSE
+        LSDKZO=1
+        LSDKFO=1
+        LSDKZS=1
+        LSDKFS=1
+      END IF
+C
+C  Double porosity            
+      if(INDP.gt.0) THEN
+        call DP6AL(ISUM,LENX,nscol,nsrow,nslay,
+     *   LSDPCON,LSDPRAT,LSDPPOR,
+     3   LSZODP,IDPZO,LSFODP,IDPFO,
+     3   iout,iouts)
+      ELSE
+        LSDPCON=1
+        LSDPRAT=1
+        LSDPPOR=1
+        LSZODP=1
+        LSFODP=1
+      END IF
+c  lake id array
+      LSIGLK=ISUMI
+      ISUMI=ISUMI+NSROW*NSCOL*NSLAY
+c  MNW arrays
+      IF(INMNW.GT.0) THEN
+	  LSSRCM=ISUM
+        ISUM=ISUM+NSROW*NSCOL*NSLAY
+        LSSNKM=ISUM
+        ISUM=ISUM+NSROW*NSCOL*NSLAY
+      ELSE
+        LSSRCM=1
+        LSSNKM=1
+        LSSOLM=1
+	END IF
+cgzh always do SOLMNW, used in SRCAVC calc
+      LSSOLM=ISUM
+      ISUM=ISUM+NSROW*NSCOL*NSLAY
+c
+c   mf2k allocates for isum-1, we use isum for placeholder on 
+c   options that are "turned off", so chuck one more in here to avoid crash
+	isum=isum+1
+	isumi=isumi+1
+C
+C6------PRINT THE AMOUNT OF SPACE USED BY THE GWT PACKAGE.
+      ISP=ISUM-ISOLD
+      WRITE(IOUT,101) ISP
+      WRITE(IOUTS,101) ISP
+  101 FORMAT(1X,I12,' ELEMENTS IN X ARRAY ARE USED BY GWT')
+C memory checks, lenx not needed for dynamic memory allocation
+c      ISUM1=ISUM-1
+c      WRITE(IOUT,102) ISUM1,LENX
+c  102 FORMAT(1X,I8,' ELEMENTS OF X ARRAY USED OUT OF',I8)
+c      IF(ISUM1.GT.LENX) WRITE(IOUT,103)
+c  103 FORMAT(1X,'   ***X ARRAY MUST BE DIMENSIONED LARGER***')
+C7------PRINT AMOUNT OF SPACE USED IN IX ARRAY.
+      ISPI=ISUMI-ISOLDI
+      WRITE(IOUT,6) ISPI
+      WRITE(IOUTS,6) ISPI
+    6 FORMAT(1X,I8,' ELEMENTS IN IX ARRAY ARE USED BY GWT')
+C memory checks not needed for dynamic memory allocation
+c      ISUMIX=ISUMIX-1
+c      WRITE(IOUT,7) ISUMIX1,LENIX
+c    7 FORMAT(1X,I8,' ELEMENTS OF MX ARRAY USED OUT OF ',I10)
+c      IF(NISUM1.GT.LENMX) WRITE(IOUT,8)
+c    8 FORMAT(1X,'   ***IX ARRAY MUST BE DIMENSIONED LARGER***')
+C
+CGWT    INITIALIZE SOURCE-TERM DECAY ACCUMULATOR 
+        SRCDCY=0.0
+C7------RETURN
+      RETURN
+      END
+C
+C
+C  GWT1BAS6RP  READ AND PREPARE GWT,  CONSTANT PARMS
+C     ******************************************************************
+C
+      SUBROUTINE GWT1BAS6RP(IBOUND,DELCOL,DELROW,
+     *  CBNDY,NTFACE,LBNDY,
+     *  XFOR,XBAC,YFOR,YBAC,
+     *  RF,NCNFBD,NBOTM,BOTM,
+     *  CONC,CONINT,CFXHBC,CINFL,
+     *  THCK,ALONG,ATRANH,ATRANV,
+     *  POR,PNEWC,PNEWR,PNEWL,IGENPT,
+     *  FDTMTH,EPSSLV,IDIREC,NCXIT,MAXIT,
+     *  SBVL,NEWPTS,NSCOL,NSROW,NSLAY,NODESS,
+     *  NCOL,NROW,NLAY,IOUTS,INMOC,
+     *  ICSTRT,JRF,NODISP,
+     *  NPNTVL,NPNTCL,NPNTDL,NPNTPL,
+     *  IVELFM,ICONFM,IDSPFM,IPRTFM,INPTA,INPTB,
+     *  ICONLY,IFXHED,ISS,NCINFL,INTRPL,IDIM,NPTPND,MOCTYPE,
+     *  INDK,DKZO,DKFO,DKZS,DKFS,
+     *  IDKRF,IDKZO,IDKFO,IDKZS,IDKFS,
+     *  INDP,DPCON,DPXRAT,DPPOR,
+     *  DPZO,DPFO,IDPZO,IDPFO,INLAKUNIT,NIUNIT,SRCAGE,
+cgzh varpt
+     *  INIPDL,INIPDA,REMCRIT,GENCRIT,IRAND,ISRCFIX,
+     *  ISEEDPT,ISEEDBD,
+cgzh cbdy
+     *  INCBDY,CINFLA,CINFLB,CINXY,IABOVE,IBELOW)
+C
+C     ******************************************************************
+C
+C  DELCOL IS WIDTH OF BLOCKS IN THE DIRECTION OF INCREASING COLUMN NUMBERS
+C         FOR CONSTANT WIDTHS, DELCOL IS THE SPACE BETWEEN COLUMNS
+C    DELCOL IS A NEW NAME FOR THE ARRAY CALLED DELR IN MODFLOW
+C
+C  DELROW IS WIDTH OF BLOCKS IN THE DIRECTION OF INCREASING ROW NUMBERS
+C         FOR CONSTANT WIDTHS, DELROW IS THE SPACE BETWEEN ROWS
+C    DELROW IS A NEW NAME FOR THE ARRAY CALLED DELC IN MODFLOW
+C
+C     ******************************************************************
+C     READ AND INITIALIZE GWT SOLUTE-TRANSPORT ARRAYS
+C     ******************************************************************
+C
+C        SPECIFICATIONS:
+C     ------------------------------------------------------------------
+      CHARACTER*24 ANAME(15)
+C
+cgzh debug double sbvl
+      DOUBLE PRECISION SBVL
+      DIMENSION SBVL(6,NIUNIT)
+      DIMENSION IBOUND(NCOL,NROW,NLAY),DELCOL(NCOL),DELROW(NROW),
+     *  BOTM(NCOL,NROW,0:NBOTM)
+      DIMENSION RF(NODESS),
+     *  CONC(NODESS),CONINT(NODESS),CINFL(NCINFL),
+     *  CFXHBC(NSCOL,NSROW,NSLAY),THCK(NSCOL,NSROW,NSLAY),
+     *  ALONG(NSLAY),ATRANH(NSLAY),ATRANV(NSLAY),
+     *  POR(NODESS),PNEWC(NEWPTS),PNEWR(NEWPTS),PNEWL(NEWPTS),
+     *  IGENPT(NODESS)
+      DIMENSION DPCON(NODESS),DPXRAT(NODESS),DPPOR(NODESS),
+     1   DPZO(NODESS),DPFO(NODESS)
+      DIMENSION DKZO(NODESS),DKFO(NODESS),
+     3   DKZS(NODESS),DKFS(NODESS)
+cgzh cbdy
+      DIMENSION CINFLA(NSCOL,NSROW),CINFLB(NSCOL,NSROW),
+     *  CINXY(NSCOL,NSROW,NSLAY)
+cellam
+      DIMENSION XFOR(NSCOL),XBAC(NSCOL),YFOR(NSROW),
+     *  YBAC(NSROW),CBNDY(NTFACE),LBNDY(NTFACE)
+      COMMON /ELLAM/ CINV,RINV,BINV,HCINV,HRINV,HBINV,WATVOL,
+     *               STINIT,ADINIT,STMASS,ADMASS,OLMASS,
+     *               AZERO,
+     *               NSC,NSR,NSL,NT,NCTF,NRTF,NLTF,
+     *               NEIGHB(8,2),NSLOPE(3),
+     *               IDTOP,IDMAX,NCOEF,NSCH,NSRH,NSLH
+cellam
+CGWT 
+cgzh randpt
+      INTEGER ITIMES(8)
+      CHARACTER*10 TIMEDUM
+CMOCWT
+      INCLUDE 'ptwt.inc'
+C
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /GWT/ CDEL,RDEL,CNOFLO,CELDIS,FZERO,NZCRIT
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+      DATA ANAME(1) /'   INITIAL CONCENTRATION'/
+      DATA ANAME(2) /'FIXED HEAD CONCENTRATION'/
+      DATA ANAME(3) /'       INITIAL THICKNESS'/
+      DATA ANAME(4) /'        INITIAL POROSITY'/
+      DATA ANAME(5) /'LONGITUDNL. DISPERSIVITY'/
+      DATA ANAME(6) /' HORIZ. TRANSVERSE DISP.'/
+      DATA ANAME(7) /'      RETARDATION FACTOR'/
+      DATA ANAME(8) /'        GENPT COL COORDS'/
+      DATA ANAME(9) /'        GENPT ROW COORDS'/
+      DATA ANAME(10)/'        GENPT LAY COORDS'/
+      DATA ANAME(11)/'        SINK-SOURCE FLAG'/
+      DATA ANAME(12)/'  VERT. TRANSVERSE DISP.'/
+      DATA ANAME(13)/' SUBGRID BOUNDARY ARRAY '/
+      DATA ANAME(14)/' SUBGRID BOUNDARY ABOVE '/
+      DATA ANAME(15)/' SUBGRID BOUNDARY BELOW '/
+C     ------------------------------------------------------------------
+      NSCR=NSCOL*NSROW
+      NCR=NCOL*NROW
+C  
+C  FOR EXPLICIT AND IMPLICIT MOC3D
+C  SET LOCATIONS OF NEW PARTICLES
+C  IF NPTPND = A DEFAULT VALUE, USE PREDEFINED LOCATIONS
+C  IF NPTPND = ANOTHER VALUE (<1), READ IN RELATIVE COORDINATES OF NEW 
+C           PARTICLES
+C  NPTPND IS NEWPTS MINUS EXTRA (SINK) LOCATION
+cgzh varpt
+C  SKIP IF ALTERNATE PARTICLE DISTRIBUTION (IPDL or IPDA)
+      IF(INIPDL.GT.0.OR.INIPDA.GT.0) GO TO 998
+cellam
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+      WRITE(IOUTS,37) NPTPND
+   37 FORMAT(/' NUMBER OF PARTICLES INITIALLY IN EACH ACTIVE CELL '
+     *,'(NPTPND) = ',I5)
+      IF(NPTPND.GT.1) WRITE(IOUTS,38) 
+   38 FORMAT(1X,'PARTICLE MAP ("o" indicates particle location; shown ',
+     *'as ',/14X, 'fractions of cell distances relative to node ',
+     *'location): ')
+      DO 123 III=1,NEWPTS
+         PNEWC(III)=0.0
+         PNEWR(III)=0.0
+         PNEWL(III)=0.0
+  123 CONTINUE
+      IF (NPTPND.LT.0) GOTO 430
+C
+C  COMMENT OUT FOLLOWING BLOCK OF WRITE STATEMENTS TO DECREASE 
+C  PARTICLE INFORMATION OUTPUT
+C
+      NPTPND=NEWPTS-1
+      IF (NPTPND.EQ.1) THEN
+         PNEWC(1)=0.0
+         PNEWR(1)=0.0
+         PNEWL(1)=0.0
+      ELSE IF ((NPTPND.EQ.2).OR.(NPTPND.EQ.8).OR.
+     +((NPTPND.EQ.4).AND.(IDIM.EQ.2))) THEN 
+         IF(IDIM.EQ.1) THEN
+            WRITE(IOUTS,*) 
+            WRITE(IOUTS,*) '      o-----o    '
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '    -1/4   1/4  '
+         ENDIF
+         IF(IDIM.EQ.2) THEN
+            WRITE(IOUTS,*) 
+            WRITE(IOUTS,*) '  1/4 o-----o    '
+            WRITE(IOUTS,*) '      |     |    '
+            WRITE(IOUTS,*) '      |     |    '
+            WRITE(IOUTS,*) '      |     |    '
+            WRITE(IOUTS,*) ' -1/4 o-----o    '
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '    -1/4   1/4  '
+         ENDIF
+         IF(IDIM.EQ.3) THEN
+            WRITE(IOUTS,*) 
+            WRITE(IOUTS,*) '        o-----o  '
+            WRITE(IOUTS,*) '       /|    /|  '
+            WRITE(IOUTS,*) '  1/4 o-----o |  '
+            WRITE(IOUTS,*) '      | |   | |  '
+            WRITE(IOUTS,*) '      | o---|-o  '
+            WRITE(IOUTS,*) '      |/    |/   '
+            WRITE(IOUTS,*) ' -1/4 o-----o    '
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '    -1/4   1/4    '
+         ENDIF
+         ILI=2
+         IRI=2
+         ICI=2
+         IF (NSLAY.LT.2) ILI=1
+         IF (NSROW.LT.2) IRI=1
+         IF (NSCOL.LT.2) ICI=1   
+         IP=0
+         RHALF=1.0/2.0
+         RZERO=-1.5*RHALF
+         RL=RZERO
+         DO 74 IL=1,ILI
+         RL=RL+RHALF
+         RR=RZERO
+         DO 74 IR=1,IRI
+         RR=RR+RHALF
+         RC=RZERO
+         DO 74 IC=1,ICI
+         RC=RC+RHALF
+         IP=IP+1
+        IF (NSCOL.GT.1) PNEWC(IP)=RC
+        IF (NSROW.GT.1) PNEWR(IP)=RR
+        IF (NSLAY.GT.1) PNEWL(IP)=RL
+  74    CONTINUE
+      ELSE IF (NPTPND.EQ.3.OR.NPTPND.EQ.9.OR.NPTPND.EQ.27) THEN
+         IF(IDIM.EQ.1) THEN
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '      o------o------o       '
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '    -1/3     0     1/3      '
+         ENDIF
+         IF (IDIM.EQ.2) THEN
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '  1/3 o------o------o       '
+            WRITE(IOUTS,*) '      |      |      |       '
+            WRITE(IOUTS,*) '      |      |      |       '
+            WRITE(IOUTS,*) '      |      |      |       '
+            WRITE(IOUTS,*) '      |      |      |       '
+            WRITE(IOUTS,*) '    0 o------o------o       '
+            WRITE(IOUTS,*) '      |      |      |       '
+            WRITE(IOUTS,*) '      |      |      |       '
+            WRITE(IOUTS,*) '      |      |      |       '
+            WRITE(IOUTS,*) '      |      |      |       '
+            WRITE(IOUTS,*) ' -1/3 o------o------o       '
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '    -1/3     0     1/3       '
+         ENDIF
+         IF (IDIM.EQ.3) THEN
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '            o------o------o '
+            WRITE(IOUTS,*) '           /|     /|     /| '
+            WRITE(IOUTS,*) '          / |    / |    / | '
+            WRITE(IOUTS,*) '         o------o------o  | '
+            WRITE(IOUTS,*) '        /|  |  /|  |  /|  | '
+            WRITE(IOUTS,*) '       / |  o-/-|--o-/-|--o '
+            WRITE(IOUTS,*) '  1/3 o------o------o  | /| '
+            WRITE(IOUTS,*) '      |  |/ ||  |/ ||  |/ | '
+            WRITE(IOUTS,*) '      |  o---|--o---|--o  | '
+            WRITE(IOUTS,*) '      | /|  || /|  || /|  | '
+            WRITE(IOUTS,*) '      |/ |  o|/-|--o|/-|--o '
+            WRITE(IOUTS,*) '    0 o------o------o  | /  '
+            WRITE(IOUTS,*) '      |  |/  |  |/  |  |/   '
+            WRITE(IOUTS,*) '      |  o---|--o---|--o    '
+            WRITE(IOUTS,*) '      | /    | /    | /     '
+            WRITE(IOUTS,*) '      |/     |/     |/      '
+            WRITE(IOUTS,*) ' -1/3 o------o------o       '
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '    -1/3     0     1/3       '
+         ENDIF
+         ILI=3
+         IRI=3
+         ICI=3
+         IF (NSLAY.LT.2) ILI=1
+         IF (NSROW.LT.2) IRI=1
+         IF (NSCOL.LT.2) ICI=1   
+         IP=0
+         THIRD=1.0/3.0
+         RZERO=-2.0*THIRD
+         RL=RZERO
+         DO 75 IL=1,ILI
+         RL=RL+THIRD
+         RR=RZERO
+         DO 75 IR=1,IRI
+         RR=RR+THIRD
+         RC=RZERO
+         DO 75 IC=1,ICI
+         RC=RC+THIRD
+         IP=IP+1
+        IF (NSCOL.GT.1) PNEWC(IP)=RC
+        IF (NSROW.GT.1) PNEWR(IP)=RR
+        IF (NSLAY.GT.1) PNEWL(IP)=RL 
+   75    CONTINUE
+c orig      ELSE IF ((NPTPND.EQ.16).OR.((NPTPND.EQ.4).AND.((NSROW.EQ.1).
+c orig     + OR.(NSCOL.EQ.1)).AND.(NSLAY.EQ.1))) THEN
+c fix for 1D multilayer (4 particles in verticle column)
+      ELSE IF ((NPTPND.EQ.16).OR.(NPTPND.EQ.4.AND.IDIM.EQ.1)) THEN
+         IF(IDIM.EQ.1) THEN
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '      o----o----o----o        '
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '    -3/8 -1/8  1/8  3/8        '
+         ENDIF
+         IF(IDIM.EQ.2) THEN
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '  3/8 o----o----o----o        '
+            WRITE(IOUTS,*) '      |    |    |    |        '
+            WRITE(IOUTS,*) '      |    |    |    |        '
+            WRITE(IOUTS,*) '  1/8 o----o----o----o        '
+            WRITE(IOUTS,*) '      |    |    |    |        '
+            WRITE(IOUTS,*) '      |    |    |    |        '
+            WRITE(IOUTS,*) ' -1/8 o----o----o----o        '
+            WRITE(IOUTS,*) '      |    |    |    |        '
+            WRITE(IOUTS,*) '      |    |    |    |        '
+            WRITE(IOUTS,*) ' -3/8 o----o----o----o        '
+            WRITE(IOUTS,*)
+            WRITE(IOUTS,*) '    -3/8 -1/8  1/8  3/8        '
+         ENDIF
+         ILI=4
+         IRI=4
+         ICI=4
+         IF (NSLAY.LT.2) ILI=1
+         IF (NSROW.LT.2) IRI=1
+         IF (NSCOL.LT.2) ICI=1
+         IP=0
+         EIGHTH=1.0/8.0
+         FOURTH=1.0/4.0
+         RZERO=-5.0*EIGHTH
+         RL=RZERO
+         DO 76 IL=1,ILI
+         RL=RL+FOURTH
+         RR=RZERO
+         DO 76 IR=1,IRI
+         RR=RR+FOURTH
+         RC=RZERO
+         DO 76 IC=1,ICI
+         RC=RC+FOURTH
+         IP=IP+1
+        IF (NSCOL.GT.1) PNEWC(IP)=RC
+        IF (NSROW.GT.1) PNEWR(IP)=RR
+        IF (NSLAY.GT.1) PNEWL(IP)=RL
+   76    CONTINUE
+      ENDIF  
+  430 IF (NPTPND.LT.0) THEN
+         WRITE(IOUTS,*) ' READ IN NONSTANDARD INITIAL PARTICLE ',
+     *      'COORDINATES'
+         WRITE(IOUTS,*)
+         WRITE(IOUTS,*) 'INITIAL RELATIVE PARTICLE COORDINATES'
+         WRITE(IOUTS,*) '   IP    PNEWL     PNEWR      PNEWC'
+         DO 79 IP=1,NEWPTS-1
+         READ(INMOC,*) PNEWL(IP),PNEWR(IP),PNEWC(IP)
+         WRITE(IOUTS,78) IP,PNEWL(IP),PNEWR(IP),PNEWC(IP)
+   78    FORMAT(1X,I4,1X,3F10.5)
+   79    CONTINUE
+      END IF
+C
+C  PRINT PARTICLE LOCATIONS
+      IF (NPTPND.GT.0) THEN
+         WRITE(IOUTS,*)
+         WRITE(IOUTS,*) 'INITIAL RELATIVE PARTICLE COORDINATES'
+         DO 997 IP=1,NPTPND
+         WRITE(IOUTS,178) IP,PNEWL(IP),PNEWR(IP),PNEWC(IP)
+  178    FORMAT(1X,I4,1X,3F10.5)
+  997    CONTINUE
+      END IF
+C
+C  END COMMENTING FOR DECREASE OF PARTICLE INFORMATION
+C   
+C  USE NPTPND+1 (=NEWPTS) AS PARTICLE ID FOR
+C       PARTICLES GENERATED AT NODE IN SINKS
+      PNEWC(NEWPTS)=0.0
+      PNEWR(NEWPTS)=0.0
+      PNEWL(NEWPTS)=0.0
+      END IF
+C END MOCTYPES 1 AND 2 ONLY
+  998    CONTINUE
+C
+C  READ PARTICLE MOVEMENT SIMULATION PARAMETERS
+cellam
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+        READ(INMOC,*) CELDIS,FZERO,INTRPL
+      ELSEIF(MOCTYPE.EQ.3) THEN
+        READ(INMOC,*) CELDIS
+        INTRPL=1
+      ENDIF
+C
+C  CELDIS = MAXIMUM FRACTION OF CELL DIMENSION ALLOWED FOR ONE TRANSPORT 
+C           STEP
+C  FZERO  = GENPT WILL BE CALLED WHEN FRACTION OF ACTIVE CELLS WITH NO 
+C           PARTICLES EXCEEDS FZERO (MOCTYPES 1 AND 2 ONLY)
+C  INTRPL = FLAG FOR INTERPOLATION ROUTINE TO USE
+C
+      WRITE(IOUTS,23) CELDIS
+   23 FORMAT(/,'  CELDIS=',F13.6)
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) WRITE(IOUTS,25) FZERO 
+   25 FORMAT('   FZERO=',F13.6)
+cellam
+      IF(CELDIS.LE.0.0) THEN
+       IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+         WRITE(IOUTS,*) ' CELDIS MUST BE GREATER THAN 0,',
+     *     ' WILL BE SET TO 0.5'
+         CELDIS=0.5
+       ELSEIF(MOCTYPE.EQ.3) THEN
+         WRITE(IOUTS,*) ' CELDIS LESS THAN OR EQUAL 0,',
+     *     ' IMPLIES NO CONSTRAINT'
+         CELDIS=0.0
+       END IF
+      END IF
+C
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+       IF (INTRPL.EQ.1) THEN
+         WRITE(IOUTS,40) 
+       ELSEIF (INTRPL.EQ.2) THEN
+         WRITE(IOUTS,41)
+       ELSE 
+         WRITE(IOUTS,142) INTRPL
+         STOP
+       ENDIF
+      ENDIF
+   40 FORMAT(/'INTRPL= 1:  LINEAR INTERPOLATION SCHEME')
+   41 FORMAT(/'INTRPL= 2:  BILINEAR INTERPOLATION SCHEME')
+  142 FORMAT(/'****ERROR*****  INTRPL = ',I6,' OUT OF RANGE')
+C8------RETURN
+C
+C  READ SIMULATION PARAMETERS FOR IMPLICIT SOLVER FOR DISPERSION TERMS
+      IF (MOCTYPE.EQ.2) THEN
+        READ(INMOC,*) FDTMTH,NCXIT,IDIREC,EPSSLV,MAXIT
+C
+        IF(FDTMTH.LT.0.5.OR.FDTMTH.GT.1.0) THEN
+         WRITE(IOUTS,*) '***WARNING***  FDTMTH = ',FDTMTH,
+     *      ' AUTOMATICALLY RESET TO FDTMTH = 1.0'
+         FDTMTH=1.0
+        ENDIF
+        IF(NCXIT.LT.2) THEN
+          WRITE(IOUTS,*) '***WARNING***  NCXIT = ',NCXIT,
+     *      '     AUTOMATICALLY RESET TO NCXIT = 2'
+          NCXIT=2
+        ENDIF
+        IF(IDIREC.LT.1.OR.IDIREC.GT.6) THEN
+          WRITE(IOUTS,*) '***WARNING***  IDIREC = ',IDIREC,
+     *      '    AUTOMATICALLY RESET TO IDIREC = 1'
+         IDIREC=1
+        ENDIF
+        IF(EPSSLV.LT.1E-7) THEN
+          WRITE(IOUTS,*) '***WARNING***  EPSSLV = ',EPSSLV,
+     *      ' AUTOMATICALLY RESET TO EPSSLV = 1E-5'
+          EPSSLV=1E-5
+        ENDIF
+        IF(MAXIT.LT.10) THEN
+          WRITE(IOUTS,*) '***WARNING***  MAXIT = ',MAXIT,
+     *      '     AUTOMATICALLY RESET TO MAXIT = 100'
+         MAXIT=100
+        ENDIF
+C
+        WRITE(IOUTS,24) FDTMTH,NCXIT,IDIREC,EPSSLV,MAXIT
+   24   FORMAT(/,' NUMERICAL PARAMETERS FOR IMPLICIT SOLVER:',/
+     *' FDTMTH =',F9.2/
+     *' NCXIT  =',I7/
+     *' IDIREC =',I7/
+     *' EPSSLV =',1PE12.4/
+     *' MAXIT  =',I7)
+      END IF
+C
+CMOCWT
+C  REMCRIT (REMOVAL CRITERIA FOR SINKS: 
+C    FRACTION OF INITIAL-PARTICLE-WEIGHT PARTICLE CAN BE BEFORE BEING REMOVED)
+C  GENCRIT (CRITERIA FOR STRONG SOURCE CELLS:
+C    IF RATIO OF WHAT IS COMING FROM SOURCE TO WHAT IS LEAVING CELL ON FACES 
+C    > CRITERIA, THEN SET AS STRONG SOURCE
+      IF(PTWTON.EQ.1) THEN
+        READ(INMOC,*) REMCRIT,GENCRIT,IRAND, ISRCFIX
+       IF(REMCRIT.EQ.0) REMCRIT=0.01
+       IF(GENCRIT.EQ.0) GENCRIT=0.5
+        WRITE(IOUTS,124) REMCRIT,GENCRIT,IRAND,ISRCFIX
+  124  FORMAT(/,' NUMERICAL PARAMETERS FOR WEIGHTED PARTICLES OPTION:',/
+     *' REMCRIT =',F9.2/
+     *' GENCRIT =',F9.2/
+     *'   IRAND =',I9,2/
+     *' ISRCFIX =',I9)
+        IF(IRAND.EQ.1) THEN
+C CALCULATE SEED FOR RANDOM REPLACEMENT AT SOURCES
+C GET TIME  
+          CALL DATE_AND_TIME(TIMEDUM,TIMEDUM,TIMEDUM,ITIMES)
+C GET SEED BY SUMMING HOUR,MIN,SEC,MILLISEC
+          ISEEDPT=ITIMES(5)+ITIMES(6)+ITIMES(7)+ITIMES(8)
+        ELSEIF (IRAND.GT.1) THEN
+	    ISEEDPT=IRAND
+	  END IF
+        IF(IRAND.GT.0) THEN
+c        write(*,*) 'iseedpt',iseedpt
+         write(iouts,*) 'ISEEDPT: SEED USED IN RANDOM FUNCTION=',iseedpt
+	  END IF
+C ALWAYS CALCULATE ISEEDBD (USE THIS FOR SUBGRID BOUNDARY OR BFLX)
+C GET TIME
+        CALL DATE_AND_TIME(TIMEDUM,TIMEDUM,TIMEDUM,ITIMES)
+C GET SEED BY SUMMING HOUR,MIN,SEC,MILLISEC
+c	  ISEEDBD=ITIMES(5)+ITIMES(6)+ITIMES(7)+ITIMES(8)
+cgzh debug hard-wired for good?  
+	  ISEEDBD=1002
+c        write(iouts,*) 'iseedbd',iseedbd
+	END IF
+C
+C  PRINT FLAGS
+cellam
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+        READ(INMOC,*) NPNTCL,ICONFM,NPNTVL,IVELFM,
+     1                NPNTDL,IDSPFM,NPNTPL
+      ELSEIF(MOCTYPE.EQ.3) THEN
+        READ(INMOC,*) NPNTCL,ICONFM,NPNTVL,IVELFM,
+     1                NPNTDL,IDSPFM
+      ENDIF
+C
+C     CONCENTRATION PRINT FLAGS
+C
+      IF (NPNTCL.LE.-3) WRITE(IOUTS,310) 'NPNTCL',NPNTCL
+      IF (NPNTCL.EQ.-2) WRITE(IOUTS,320) 'NPNTCL',NPNTCL,
+     1                                   'CONCENTRATIONS'
+      IF (NPNTCL.EQ.-1) WRITE(IOUTS,330) 'NPNTCL',NPNTCL,
+     1                                   'CONCENTRATIONS'
+      IF (NPNTCL.EQ.0) WRITE(IOUTS,340) 'NPNTCL',NPNTCL,
+     1                                  'CONCENTRATIONS'
+      IF (NPNTCL.GT.0) WRITE(IOUTS,350) 'NPNTCL',NPNTCL,
+     1                     'CONCENTRATIONS',NPNTCL,' PARTICLE MOVES' 
+      WRITE(IOUTS,360) 'CONCENTRATION DATA', 'ICONFM',ICONFM
+C 
+C     VELOCITY PRINT FLAGS
+C
+      IF (NPNTVL.LE.-2) WRITE(IOUTS,310) 'NPNTVL',NPNTVL
+      IF (NPNTVL.EQ.-1) WRITE(IOUTS,320) 'NPNTVL',NPNTVL,'VELOCITIES'
+      IF (NPNTVL.EQ.0) WRITE(IOUTS,340) 'NPNTVL',NPNTVL,'VELOCITIES'
+      IF (NPNTVL.GT.0) WRITE(IOUTS,350) 'NPNTVL',NPNTVL,'VELOCITIES',
+     1                                   NPNTVL, ' FLOW TIME STEPS'
+      WRITE(IOUTS,360) 'VELOCITY DATA', 'IVELFM',IVELFM
+C
+C     DISPERSION PRINT FLAGS
+C
+      IF (NPNTDL.LE.-3) WRITE(IOUTS,310) 'NPNTDL',NPNTDL
+      IF (NPNTDL.EQ.-2) WRITE(IOUTS,320) 'NPNTDL',NPNTDL,
+     1                                   'DISP. COEFFICIENTS'
+      IF (NPNTDL.EQ.-1) WRITE(IOUTS,340) 'NPNTDL',NPNTDL,
+     1                                   'DISP. COEFFICIENTS'
+      IF (NPNTDL.EQ.0) WRITE(IOUTS,370) 'NPNTDL',NPNTDL,
+     1                                  'DISP. COEFFICIENTS'
+      IF (NPNTDL.GT.0) WRITE(IOUTS,350) 'NPNTDL',NPNTDL,
+     1               'DISP. COEFFICIENTS',NPNTDL,' FLOW TIME STEPS'
+      IF (NPNTDL.NE.0) WRITE(IOUTS,360) 'DISPERSION DATA', 'IDSPFM',
+     1                                   IDSPFM
+C
+C     PARTICLE LOCATION PRINT FLAGS
+C
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+       IF (NPNTPL.LE.-3) WRITE(IOUTS,310) 'NPNTPL',NPNTPL
+       IF (NPNTPL.EQ.-2) WRITE(IOUTS,320) 'NPNTPL',NPNTPL,
+     1                                   'PARTICLE LOCATIONS'
+       IF (NPNTPL.EQ.-1) WRITE(IOUTS,330) 'NPNTPL',NPNTPL,
+     1                                   'PARTICLE LOCATIONS'
+       IF (NPNTPL.EQ.0) WRITE(IOUTS,340) 'NPNTPL',NPNTPL,
+     1                                  'PARTICLE LOCATIONS'
+       IF (NPNTPL.GT.0) WRITE(IOUTS,350) 'NPNTPL',NPNTPL,
+     1               'PARTICLE LOCATIONS',NPNTPL,' PARTICLE MOVES'
+       IF (IPRTFM.EQ.0) WRITE(IOUTS,*) 'IPRTFM=',IPRTFM,
+     1 'PRINTED PARTICLE Z-COORDINATES NOT ADJUSTED AT WATER TABLE'
+       IF (IPRTFM.GT.0) WRITE(IOUTS,*) 'IPRTFM=',IPRTFM,
+     1 'PRINTED PARTICLE Z-COORDINATES ADJUSTED AT WATER TABLE'
+      ENDIF
+C
+  310 FORMAT(/'***WARNING***',A6,'=',I4,': OUT OF RANGE')
+  320 FORMAT(/A6,'=',I5,': ',A18,' WILL BE WRITTEN AT THE',
+     1' END OF EVERY STRESS PERIOD') 
+  330 FORMAT(/A6,'=',I5,': ',A18,' WILL BE WRITTEN AT THE',
+     1' END OF EVERY FLOW TIME STEP')
+  340 FORMAT(/A6,'=',I5,': ',A18,' WILL BE WRITTEN AT THE',
+     1' END OF THE SIMULATION')       
+  350 FORMAT(/A6,'=',I5,': ',A18,' WILL BE WRITTEN EVERY ',
+     1  I5, A16) 
+  360 FORMAT('MODFLOW FORMAT SPECIFIER FOR ',A18,': ',A6,'=',I5)
+  370 FORMAT(/A6,'=',I5,': ',A18,' WILL NOT BE WRITTEN')
+C
+C3------READ AND PRINT CONC VALUE TO BE PRINTED FOR NO-FLOW CELLS.
+      READ(INMOC,*) CNOFLO
+      WRITE(IOUTS,3) CNOFLO
+    3 FORMAT(1H /,'CONCENTRATION WILL BE SET TO ',1PG11.5,
+     1       ' AT ALL NO-FLOW NODES (IBOUND=0).')
+C
+C4------READ STARTING CONCENTRATIONS.
+      DO 300 KS=1,NSLAY
+C  KK IS NUMBER OF FLOW LAYER
+      KK=KS+ISLAY1-1
+      LOC=1+(KS-1)*NSCR
+      CALL U2DREL(CONC(LOC),ANAME(1),NSROW,NSCOL,KK,INMOC,IOUTS)
+  300 CONTINUE
+C
+C5------SET CONC IN NO FLOW CELLS TO CNOFLO
+      LOCS=0
+      DO 403 KS=1,NSLAY
+       K=KS+ISLAY1-1
+       DO 402 IS=1,NSROW
+        I=IS+ISROW1-1
+        DO 401 JS=1,NSCOL
+         J=JS+ISCOL1-1
+         LOCS=LOCS+1
+c warn about negative conc input
+         if(conc(locs).lt.0.0) then
+          write(iouts,*) '****WARNING**** CONCENTRATION INPUT < 0'
+          write(iouts,*) 'IN INITIAL CONCENTRATION ARRAY'
+	   end if
+         IF(IBOUND(J,I,K).EQ.0) CONC(LOCS)=CNOFLO
+C     INITIALIZE INFLOW CONCENTRATION AT FIXED HEAD CELLS TO ZERO
+         IF(ICONLY.NE.1) CFXHBC(JS,IS,KS)=0.D0
+  401   CONTINUE
+  402  CONTINUE
+  403 CONTINUE
+C
+C
+C6------IF STARTING CONCENTRATIONS ARE TO BE SAVED THEN COPY CONC TO 
+C       CONINT.
+      IF(ICSTRT.EQ.1) THEN
+         DO 500 I=1,NODESS
+         CONINT(I)=CONC(I)
+  500    CONTINUE
+      END IF
+cellam
+C
+C     FOR ELLAM,
+C      INITIALIZE BOUNDARY CONCENTRATIONS
+C
+      IF(MOCTYPE.EQ.3) THEN
+C  X FACES
+       ISTRT=1
+       IEND=NSROW*NSLAY*2
+       IDEL=NSCOL
+       IPTR1=1
+       IPTR2=NSCOL
+       CALL BNINIT(ISTRT,IEND,IPTR1,IPTR2,IDEL,CBNDY,
+     *            LBNDY,CONC,NTFACE,NODESS)
+C  Y FACES
+       DO 20 M=1,NSLAY
+       ISTRT=IEND+1
+       IEND=IEND+NSCOL*2
+       IDEL=1
+       IPTR1=1+NSCR*(M-1)
+       IPTR2=NSCR*M-NSCOL+1
+       CALL BNINIT(ISTRT,IEND,IPTR1,IPTR2,IDEL,CBNDY,
+     *            LBNDY,CONC,NTFACE,NODESS)
+20    CONTINUE
+C  Z FACES
+       ISTRT=IEND+1
+       IEND=IEND+NSCR*2
+       IDEL=1
+       IPTR1=1
+       IPTR2=NSCR*(NSLAY-1)+1
+       CALL BNINIT(ISTRT,IEND,IPTR1,IPTR2,IDEL,CBNDY,
+     *            LBNDY,CONC,NTFACE,NODESS)
+      END IF
+cellam
+C
+C     READ C' FOR EACH LAYER AND ANY LAYER ABOVE OR BELOW
+C     THE TRANSPORT SUBGRID
+cgzh cbdy
+      IF(INCBDY.EQ.0) THEN
+        WRITE(IOUTS,3003) NCINFL
+      ELSE
+cgzh cinxy
+        WRITE(IOUTS,*) 'CBDY PACKAGE USED FOR SUBGRID BOUNDARY INFLOW 
+     & CONCENTRATIONS'
+c	  NCTEMP=NCINFL
+c        IF (ISLAY1.GT.1) NCTEMP=NCTEMP-1
+c	  IF (ISLAY2.LT.NLAY) NCTEMP=NCTEMP-1
+c        WRITE(IOUTS,4003) NCTEMP
+	END IF
+C
+	IF(ISROW1.GT.1.OR.ISROW2.LT.NROW.OR.
+     *   ISCOL1.GT.1.OR.ISCOL2.LT.NCOL) WRITE(IOUTS,3002)
+cgzh cbdy
+      IF(INCBDY.EQ.0) THEN
+        IF (ISLAY1.GT.1) WRITE (IOUTS,3004)
+        IF (ISLAY2.LT.NLAY) WRITE (IOUTS,3005)
+cgzh cinxy
+c      ELSE
+c        WRITE(IOUTS,*) 'CBDY PACKAGE USED TO READ CINFL FOR LAYERS',
+c     * ' ABOVE AND BELOW SUBGRID'
+      END IF
+ 3003 FORMAT(//'VALUES OF C'' REQUIRED FOR SUBGRID BOUNDARY ARRAY = '
+     *     ,I4)
+ 4003 FORMAT(//'CBDY ON: VALUES OF C'' REQUIRED FOR SUBGRID BOUNDARY',
+     * ' ARRAY = ',I4)
+ 3002 FORMAT('ONE FOR EACH LAYER IN TRANSPORT SUBGRID')
+ 3004 FORMAT('ONE FOR INFLOW FROM LAYER ABOVE')
+ 3005 FORMAT('ONE FOR INFLOW FROM LAYER BELOW')
+cgzh cbdy init
+      CINFLA=0.0 
+      CINFLB=0.0  
+cgzh cinxy
+      CINXY=0.0
+cgzh cbdy if cbdy off
+      IF (NSROW.EQ.NROW.AND.NSCOL.EQ.NCOL) THEN       
+         NNSLAY = 0                                  
+      ELSE IF (NSROW.NE.NROW.OR.NSCOL.NE.NCOL) THEN  
+         NNSLAY = NSLAY                               
+      END IF                                         
+      IF(INCBDY.EQ.0) THEN
+        IF(NCINFL.GT.0) THEN
+         WRITE(IOUTS,3806)
+ 3806 FORMAT(/,'ORDER OF C'' VALUES: FIRST LAYER IN SUBGRID, ',
+     *   'EACH SUBSEQUENT ',
+     *   'LAYER,',/,'LAYER ABOVE SUBGRID, LAYER BELOW SUBGRID:')
+         CALL U1DREL(CINFL,ANAME(13),NCINFL,INMOC,IOUTS)
+         kindex=nslay
+         if(iabove.eq.1) kindex=kindex+1
+         if(ibelow.eq.1) kindex=kindex+1
+         do 141 kk=1,kindex
+c warn about negative conc input
+         if((cinfl(kk)).lt.0.0) then
+          write(iouts,*) '****WARNING**** CONCENTRATION INPUT < 0'
+          write(iouts,*) 'IN CONCENTRATION FROM SUBGRID BOUNDARY'
+	   end if           
+ 141     continue
+cgzh cbdy populate cinfla and cinflb if cbdy is off
+         IF (IABOVE.EQ.1) THEN
+	     IF(IBELOW.EQ.0) CINFLA=CINFL(NNSLAY+1)  
+	     IF(IBELOW.EQ.1) THEN
+  		     CINFLA=CINFL(NNSLAY+1)  
+		     CINFLB=CINFL(NNSLAY+2)  
+		 END IF
+         ELSE
+	     IF(IBELOW.EQ.1) CINFLB=CINFL(NNSLAY+1) 
+         END IF
+cgzh cinxy populate cinxy array
+        IF(NNSLAY.GT.0) THEN
+         DO 743 KS=1,NSLAY
+         DO 743 JS=1,NSCOL
+         DO 743 IS=1,NSROW
+            CINXY(JS,IS,KS)=CINFL(KS)         
+  743    CONTINUE
+        END IF
+C
+        ENDIF
+cgzh cbdy  else if cbdy is on, read values
+      ELSE
+c        IF(NCTEMP.GT.0) THEN
+c         WRITE(IOUTS,3807)
+c 3807 FORMAT(/,'ORDER OF C'' VALUES: FIRST LAYER IN SUBGRID, ',
+c     *   'THEN EACH SUBSEQUENT ',
+c     *   'LAYER')
+c         CALL U1DREL(CINFL,ANAME(13),NCTEMP,INCBDY,IOUTS)
+c        ENDIF
+cgzh cinxy changed bdy to always read all values for all layers, in proper order
+         IF (ISLAY1.GT.1)    CALL U2DREL(CINFLA,ANAME(14),
+     &     NSROW,NSCOL,ISLAY1-1,INCBDY,IOUTS)
+cgzh cinxy read cinxy array
+        IF(NNSLAY.GT.0) THEN
+         DO 744 KS=ISLAY1,ISLAY2
+           KK=KS-ISLAY1+1
+           CALL U2DREL(CINXY(1,1,KK),ANAME(13),
+     &       NSROW,NSCOL,KS,INCBDY,IOUTS)
+  744    CONTINUE
+        ENDIF
+         IF (ISLAY2.LT.NLAY) CALL U2DREL(CINFLB,ANAME(15),
+     &     NSROW,NSCOL,ISLAY2+1,INCBDY,IOUTS)
+      END IF
+C
+C4------READ FIXED HEAD BOUNDARY CONCENTRATIONS                
+C     USE IBOUND VALUES < 0 AS ZONES OF DIFFERENT C'
+C     USER MUST LIST # OF ZONES, THEN A TABLE WITH CORRESPONDING CONC
+C     SKIP THIS INPUT IF ICONLY=1
+C
+C     IF CHD IS ON THE CONC FOR THOSE CELLS WILL BE READ USING THE "PACKAGE"
+C     TYPE ROUTINES DURING EACH STRESS PERIOD
+C
+      IF(ICONLY.NE.1) THEN
+         READ(INMOC,*) NZONES
+         WRITE(IOUTS,3010) NZONES
+ 3010    FORMAT(//' NUMBER OF ZONES FOR CONCENTRATIONS AT FIXED',
+     *' HEAD CELLS = ',I4/)
+C
+         DO 305 IZ=1,NZONES
+          READ(INMOC,*) IZONE, ZONCON
+          WRITE(IOUTS,3011) IZONE, ZONCON
+ 3011  FORMAT(' ZONE FLAG =',I5,5X,'INFLOW CONCENTRATION = ',
+     *   1PE12.4)
+C
+         DO 304 KS=1,NSLAY
+          K=KS+ISLAY1-1
+          DO 303 IS=1,NSROW
+           I=IS+ISROW1-1
+           DO 302 JS=1,NSCOL
+            J=JS+ISCOL1-1
+              IF (IBOUND(J,I,K).EQ.IZONE) THEN     
+                CFXHBC(JS,IS,KS)=ZONCON
+                WRITE(IOUTS,3006) ZONCON, J,I,K
+              ENDIF
+ 302        CONTINUE
+ 303       CONTINUE
+ 304      CONTINUE
+ 305     CONTINUE
+      END IF
+C
+ 3006 FORMAT('FIXED HEAD INFLOW CONCENTRATION SET TO ', F12.3,
+     *'  FOR NODE AT',3I10)
+C
+C  READ FLAG TO TREAT SINK/SOURCE AS STRONG FOR PARTICLE REGENERATION AND 
+C      REMOVAL
+cellam
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+CMOCWT
+      IF(PTWTON.EQ.0) THEN
+      DO 306 KS=1,NSLAY
+C  KK IS NUMBER OF FLOW LAYER
+      KK=KS+ISLAY1-1
+      LOC=1+(KS-1)*NSCR
+      CALL U2DINT(IGENPT(LOC),ANAME(11),NSROW,NSCOL,KK,
+     *  INMOC,IOUTS)
+  306 CONTINUE
+      ENDIF
+CMOCWT
+      ENDIF
+cellam
+C
+      IF (INLAKUNIT.GT.0) THEN
+         WRITE (IOUTS,3306) 
+ 3306    FORMAT (//2X,'*** NOTE ***  LAKE PACKAGE ACTIVE;'/01X,' ALL ACT
+     1IVE TRANSPORT SUBGRID CELLS ADJACENT TO LAKES FLAGGED AS STRONG SO
+     2URCE/SINK CELLS.'/)
+      END IF
+C  READ DISPERSIVITIES BY LAYER
+      IF(NODISP.NE.1) THEN
+         CALL U1DREL(ALONG,ANAME(5),NSLAY,INMOC,IOUTS)
+         CALL U1DREL(ATRANH,ANAME(6),NSLAY,INMOC,IOUTS)
+         CALL U1DREL(ATRANV,ANAME(12),NSLAY,INMOC,IOUTS)
+      END IF
+C
+C  INITIALIZE RF ARRAY=1
+      DO 307 INODE=1,NODESS
+             RF(INODE)=1.0
+  307 CONTINUE
+C
+C  READ RETARDATION FACTOR BY LAYER
+      CALL U1DREL(RF,ANAME(7),NSLAY,INMOC,IOUTS)
+      JRF=0
+      loc=NSLAY*NSCR+1
+      IRFSET=0
+      IRFOVR=0
+      IF(INDK.GT.0) THEN
+        IF(IDKRF.EQ.1) THEN
+          IRFOVR=1
+          JRF=1
+        END IF
+      END IF
+C  LOOP BACKWARDS AND FILL ENTIRE ARRAY WITH LAYER VALUES
+      DO 308 KS=NSLAY,1,-1
+        IF (RF(KS).EQ.0.0) THEN
+          RF(KS)=1.0
+          WRITE(IOUTS,1020) KS
+        ENDIF
+c warn if 0 < rf < 1
+        IF (RF(KS).LT.1.0.AND.RF(KS).GT.0.0) THEN
+          WRITE(IOUTS,1010) KS
+	    STOP
+ 1010 FORMAT(1H /,'*** WARNING ***   0.0 < RF < 1.0 for subgrid layer ',
+     *  I3,': solute will travel faster than fluid')
+        ENDIF
+c do not allow rf < 0
+        IF (RF(KS).LT.0.0) THEN
+          WRITE(IOUTS,1015) KS
+	    STOP
+ 1015 FORMAT(1H /,'*** ERROR ***   RF for subgrid layer ',I3,
+     *' read in as < 0.0')
+        ENDIF
+        IF (RF(KS).NE.1.0) JRF=1
+c  put layer values into cell-by-cell array, IF DK RF NOT ACTIVE
+        IF(IRFOVR.EQ.0) THEN
+          do 328 is=NSROW,1,-1
+          do 328 js=NSCOL,1,-1
+            loc=loc-1
+            RF(loc)=rf(ks)
+  328     CONTINUE
+        ELSE
+            IF(RF(KS).NE.1.0) IRFSET=1
+        END IF
+  308 CONTINUE
+ 1020 FORMAT(1H /,'*** NOTE ***   RF for subgrid layer ',I3,
+     *' was input as 0.0 and redefined as RF = 1.0')
+      IF(IRFSET.EQ.1) WRITE(IOUTS,1021)
+ 1021 FORMAT(/' **** WARNING ****  INPUT RF NOT USED BECAUSE',
+     *' DK RF OPTION ACTIVE *******************'/)
+C
+C  READ PROPERTIES, ONE LAYER AT A TIME
+C
+c determine how many confining bed layers are above the subgrid; store
+c   it in NCNFSB
+c only need this locally (loop over subgrid)
+      NCNFSB = 0
+      IF (ISLAY1.GT.1) THEN
+        DO 21 I = 1,ISLAY1
+          IF (LAYCBD(I).NE.0) THEN
+            NCNFSB = NCNFSB + 1
+          ENDIF
+ 21     CONTINUE
+      ENDIF
+C
+	IWARN=0
+      DO 309 KS=1,NSLAY
+C  KK IS NUMBER OF FLOW LAYER
+c  when accessing BOTM, need to account for 
+c  number of confining beds above subgrid (NCNFSB)
+      KK=KS+ISLAY1-1
+      LOC=1+(KS-1)*NSCR
+C
+C4------READ CELL POROSITIES, FOR EACH CELL
+      CALL U2DREL(POR(LOC),ANAME(4),NSROW,NSCOL,KK,INMOC,IOUTS)
+C
+c check LAYCBD for use of quasi-3D confining bed within subgrid
+	  IF(LAYCBD(KK).NE.0) 
+     *     IWARN=1
+C
+C CALCULATE THICKNESS
+c define THCK array for GWT using BOTM array
+c BOTM(0) is top of first flow layer
+c LBOTM count includes confining beds
+c when accessing BOTM, need to account for 
+c number of confining beds above subgrid (NCNFSB)
+      KT=KK-NCNFSB
+c
+	  DO 309 IS=1,NSROW
+        II=IS+ISROW1-1
+	  DO 309 JS=1,NSCOL
+        JJ=JS+ISCOL1-1
+		  THCK(JS,IS,KS)= BOTM(JJ,II,(LBOTM(KT)-1))-
+     *                      BOTM(JJ,II,(LBOTM(KT)))
+  309 CONTINUE
+C PRINT WARNING ABOUT USING QUASI-3D AND TRANSPORT
+        IF(IWARN.EQ.1) WRITE(IOUTS,1888) 
+ 1888 FORMAT(/' **** WARNING ****  USE OF QUASI-3D CONFINING BED',
+     *' WITHIN TRANSPORT SUBGRID NOT RECOMMENDED WHEN USING GWT',
+     *' PROCESS****'/,'----> SIGNIFICANT ERRORS MAY RESULT!')
+C PRINT THICKNESS IF TRANSIENT
+      IF(ISS.EQ.0) THEN
+        DO 1310 KS=1,NSLAY
+          CALL ULAPRWC(THCK,NSCOL,NSROW,KS,IOUTS,1,
+     &  'INITIAL SATURATED THICKNESS')
+ 1310 CONTINUE
+      END IF
+C
+c moved laycon/por/sc check to GWT1BAS6CK
+C
+C  FOR EXPLICIT AND IMPLICIT MOC3D
+C  SET GWT CONSTANTS
+C  NOTE NAME CHANGE FROM MODFLOW
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+       CDEL=DELCOL(ISCOL1)
+       DO 42 JS=2,NSCOL
+       J=JS+ISCOL1-1
+       IF(CDEL.EQ.DELCOL(J)) GO TO 42
+       WRITE(IOUTS,*) ' TRANSPORT SUBGRID DOES NOT HAVE UNIFORM DELCOL'
+cgzh debug
+       write(iouts,*) 'cdel,delcol(j),j',cdel,delcol(j),j
+       STOP
+   42  CONTINUE
+       DCINV=1.0/CDEL
+       RDEL=DELROW(ISROW1)
+       DO 43 IS=2,NSROW
+       I=IS+ISROW1-1
+       IF(RDEL.EQ.DELROW(I)) GO TO 43
+       WRITE(IOUTS,*) ' TRANSPORT SUBGRID DOES NOT HAVE UNIFORM DELROW'
+cgzh debug
+       write(iouts,*) 'rdel,delrow(i),i',cdel,delcol(j),j
+       STOP
+   43  CONTINUE
+       DRINV=1.0/RDEL
+       ARINV=DCINV*DRINV
+       AREA=CDEL*RDEL
+cellam
+C
+C  SET ELLAM CONSTANTS
+C
+      ELSEIF(MOCTYPE.EQ.3) THEN
+cea need to define these two due to change in call to SGWT1BAS6UP for ELLAM
+       CDEL=DELCOL(ISCOL1)
+       RDEL=DELROW(ISROW1)
+       JS=1
+       XBAC(1)=0.5D0
+       XFOR(NSCOL)=0.5D0
+       DO 44 J=ISCOL1,ISCOL2-1
+       WINV=1.D0/(DELCOL(J)+DELCOL(J+1))
+       XFOR(JS)=DELCOL(J)*WINV
+       JS=JS+1
+       XBAC(JS)=DELCOL(J+1)*WINV
+44     CONTINUE
+       IS=1
+       YBAC(1)=0.5D0
+       YFOR(NSROW)=0.5D0
+       DO 45 I=ISROW1,ISROW2-1
+       WINV=1/(DELROW(I)+DELROW(I+1))
+       YFOR(IS)=DELROW(I)*WINV
+       IS=IS+1
+       YBAC(IS)=DELROW(I+1)*WINV
+45     CONTINUE
+      END IF
+C
+C  INITIALIZE MASS BALANCE ACCUMULATOR
+C
+       SRCAGE=0.0
+C
+C  INITIALIZE SOLUTE MASS BUDGET ACCUMULATORS TO ZERO
+      DO 900 I=1,NIUNIT
+      DO 900 J=1,6
+      SBVL(J,I)=0.0
+  900 CONTINUE
+C
+C  READ DOUBLE POROSITY PARAMETERS
+        if(INDP.gt.0) THEN
+           call DP6RP(IBOUND,
+     2     DPCON,DPXRAT,DPPOR,
+     3     DPZO,DPFO,
+     4     IDPZO,IDPFO,
+     3     NSCOL,NSROW,NSLAY,NODESS,
+     4     NCOL,NROW,NLAY,
+     5     INDP,0,IOUT,IOUTS,MOCTYPE)
+      END IF
+C  READ SIMPLE REACTION PARMS
+      IF(INDK.GT.0) THEN
+        CALL DK6RP(RF,DKZO,DKFO,DKZS,DKFS,
+     1         IDKRF,IDKZO,IDKFO,IDKZS,IDKFS,
+     *          0,IOUTS,INDK,
+     3     NSCOL,NSROW,NSLAY,NODESS,MOCTYPE)
+      END IF
+C9------RETURN
+ 1000 RETURN
+      END
+C
+C
+C  MOC1BAS6CK -- CROSS CHECK MODFLOW AND GWT PARAMETERS FOR CONSISTENCY
+C     ***************************************************************
+C
+      SUBROUTINE GWT1BAS6CK(THCK,POR,DELCOL,DELROW,
+     *  IBOUND,CC,HY,SC1,SC2,IUNIT,ISSFLG,NPER,
+     *  NCOL,NROW,NLAY,NSCOL,NSROW,NSLAY,
+     *  IOUTS,IWDFLG,LAYHDT,NIUNIT)
+C
+C     ******************************************************************
+C
+C        SPECIFICATIONS:
+C     ------------------------------------------------------------------
+C
+      DIMENSION THCK(NSCOL,NSROW,NSLAY),POR(NSCOL,NSROW,NSLAY),
+     *  IBOUND(NCOL,NROW,NLAY),CC(NCOL,NROW,NLAY),
+     *  HY(NCOL,NROW,NLAY),SC1(NCOL,NROW,NLAY),SC2(NCOL,NROW,NLAY)
+      DIMENSION IUNIT(NIUNIT),DELCOL(NCOL),DELROW(NROW),LAYHDT(NLAY)
+      DIMENSION ISSFLG(NPER)
+C
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+CMOCWT
+      INCLUDE 'ptwt.inc'
+C
+C     ------------------------------------------------------------------
+C
+C CHECK WETTING FLAG
+	IF(IWDFLG.NE.0.AND.PTWTON.EQ.0) WRITE (IOUTS,*) 
+     * '***WARNING*** WETTING OPTION NOT SUPPORTED IN GWT',
+     * ' PROCESS WITHOUT WEIGHTED PARTICLES OPTION'
+C
+C  COMPARE POROSITY TO SC1 OR SC2 DATA FOR LAYHDT=1
+C    AND TRANSIENT FLOW
+      LOC=0
+      DO 134 K=1,NLAY
+        KS=K-ISLAY1+1
+        IF(KS.LT.1.OR.KS.GT.NSLAY) GO TO 134
+C  ONLY FOR TRANSIENT FLOW CASES
+      ISTRANS=0
+      DO 88 KPER=1,NPER
+        IF(ISSFLG(KPER).EQ.0) ISTRANS=1
+   88 CONTINUE
+        IF(ISTRANS.EQ.0) GO TO 134
+C  DON'T CHECK LAYHDT=0 CASE, ASSUME SC1=CONFINED
+        IF(LAYHDT(K).EQ.0) THEN
+          GO TO 134
+        END IF
+        IWARN=0
+        DO 133 IS=1,NSROW
+          I=IS+ISROW1-1
+          DO 133 JS=1,NSCOL
+            J=JS+ISCOL1-1
+            LOC=LOC+1
+C not for no-flow
+            IF(IBOUND(J,I,K).EQ.0) GO TO 133
+C  SC1,SC2 multiplied by area of cell in bcf and lpf; reflect this in error check
+	      T1=(SC1(J,I,K)/(DELROW(I)*DELCOL(J)))
+            T2=POR(JS,IS,KS)-T1
+            IF(ABS(T2).GT.0.00001) IWARN=1
+  133   CONTINUE
+        IF(IWARN.EQ.1) WRITE(IOUTS,1344) K
+ 1344   FORMAT(/,' **** WARNING ****  LAYER ',I3,' POROSITY AND ',
+     *  'STORAGE COEF DO NOT MATCH'/
+     *  '    ASSUMPTIONS IN TRANSPORT EQUATION MAY BE VIOLATED')
+  134 CONTINUE
+C
+      IERFLG=0
+      DO 100 KS=1,NSLAY
+       K=KS+ISLAY1-1
+       DO 100 IS=1,NSROW
+        I=IS+ISROW1-1
+        DO 100 JS=1,NSCOL
+         J=JS+ISCOL1-1
+C THICKNESS = 0 vs IBOUND/POR/TRAN OR HY
+c don't check if a no-flow cell
+         IF (THCK(JS,IS,KS).LE.0.and.ibound(j,i,k).ne.0) THEN
+          IF (IBOUND(J,I,K).LT.0) THEN
+            WRITE (IOUTS,900) 'IBOUND VALUE < 0  ',JS,IS,KS
+            IERFLG=1
+          ENDIF
+          IF (POR(JS,IS,KS).GT.0) THEN
+            WRITE (IOUTS,900) 'POROSITY > 0      ',JS,IS,KS
+            IERFLG=1
+          ENDIF
+C TRAN IN CC IF LAYHDT = 0
+          IF (LAYHDT(K).EQ.0) THEN
+            IF (CC(J,I,K).GT.0) THEN
+             WRITE (IOUTS,900)'TRANSMISSIVITY > 0',JS,IS,KS
+             IERFLG=1
+            ENDIF
+          ELSE
+            IF (HY(J,I,K).GT.0) THEN
+             WRITE (IOUTS,900)'HYDRAULIC COND > 0',JS,IS,KS
+             IERFLG=1
+            ENDIF
+          ENDIF
+         ENDIF    
+C POROSITY = 0 vs IBOUND/THCK/TRAN OR HY
+         IF (POR(JS,IS,KS).LE.0.and.ibound(j,i,k).ne.0) THEN
+          IF (IBOUND(J,I,K).LT.0) THEN
+            WRITE (IOUTS,910) 'IBOUND VALUE < 0  ',JS,IS,KS
+            IERFLG=1
+          ENDIF
+          IF (THCK(JS,IS,KS).GT.0) THEN
+            WRITE (IOUTS,910) 'THICKNESS > 0     ',JS,IS,KS
+            IERFLG=1
+          ENDIF
+         ENDIF
+C POROSITY > 1
+         IF (POR(JS,IS,KS).GT.1.0) THEN
+           WRITE (IOUTS,920) JS,IS,KS
+         ENDIF
+ 100  CONTINUE
+ 900  FORMAT(/,'***WARNING***  THICKNESS = 0 and ',A18,' AT NODE',3I4)
+ 910  FORMAT(/,'***WARNING***  POROSITY  = 0 and ',A18,' AT NODE',3I4)
+ 920  FORMAT(/,'***WARNING***  POROSITY  > 1 AT NODE',3I4)
+C
+C STOP IF FATAL PROBLEMS ENCOUNTERED
+      IF (IERFLG.EQ.1) THEN
+         WRITE(IOUTS,1000) 
+ 1000 FORMAT(///,'***FATAL ERROR*** SIMULATION', 
+     *       ' TERMINATED DUE TO INCONSISTENCIES IN DATA')
+         STOP
+      ENDIF
+      RETURN
+      END
+C
+C
+C*************************************************************************
+C SMOC6TK   SET INITIAL SATURATED THICKNESS    
+C
+C*************************************************************************
+C
+      SUBROUTINE SMOC6TK(HNEW,
+     *  IBOUND,HOLD,BOTM,NBOTM,
+     *  THCK,
+     *  NSCOL,NSROW,NSLAY,
+     *  NCOL,NROW,NLAY,IOUTS,ISS,LAYHDT)
+C
+C*************************************************************************
+C
+      DOUBLE PRECISION HNEW
+C
+      DIMENSION HNEW(NCOL,NROW,NLAY),
+     *  IBOUND(NCOL,NROW,NLAY),
+     *  HOLD(NCOL,NROW,NLAY),
+     *  THCK(NSCOL,NSROW,NSLAY),
+     *  BOTM(NCOL,NROW,0:NBOTM),LAYHDT(NLAY)
+C
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+C
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+C*************************************************************************
+C    SET INITIAL SATURATED THICKNESS
+C     FOR WATER-TABLE CELLS USE FLOW MODEL INFORMATION
+C     SET THICKNESS TO ZERO IN INACTIVE CELLS
+C
+C  LOOP FOR ALL LAYERS TO SET TOP COUNTER
+      DO 40 K=1,NLAY
+      KS=K-ISLAY1+1
+C  SKIP IF LAYER NOT IN TRANSPORT SUBGRID
+      IF(KS.LE.0.OR.KS.GT.NSLAY) GO TO 40
+C
+      DO 10 IS=1,NSROW
+      I=IS+ISROW1-1
+      DO 10 JS=1,NSCOL
+      J=JS+ISCOL1-1
+C  SET THICKNESS TO ZERO IN INACTIVE CELLS
+      IF(IBOUND(J,I,K).EQ.0) THEN
+         THCK(JS,IS,KS)=0.0
+         GO TO 10
+      END IF
+C  SKIP IF CONSTANT THICKNESS
+      IF(LAYHDT(K).EQ.0) GO TO 10
+C  FOR SS FLOW, USE HEAD SOLUTION
+      IF(ISS.EQ.1) THEN
+         HD=HNEW(J,I,K)
+      ELSE
+C  FOR TRANSIENT FLOW, USE OLD (INITIAL) HEAD
+         HD=HOLD(J,I,K)
+      END IF
+C  CALCULATE SATURATED THICKNESS
+      IF (K.EQ.1) THEN
+        THCK(JS,IS,KS)=HD-BOTM(J,I,LBOTM(K))
+	ELSE 
+C TOP = BOTTOM OF LAYER ABOVE
+  	  TTOP=BOTM(J,I,LBOTM(K)-1)
+	  IF(HD.LT.TTOP) TTOP=HD
+        THCK(JS,IS,KS)=TTOP-BOTM(J,I,LBOTM(K))
+	END IF
+   10 CONTINUE
+   40 CONTINUE
+C
+      RETURN
+      END
+C
+C
+C*************************************************************************
+C
+      SUBROUTINE SGWT1BAS6UP(HNEW,
+     *           IBOUND,HOLD,BOTM,NBOTM,
+     *  SC1,SC2,THCK,POR,BUFF,DELT,
+     *  NSCOL,NSROW,NSLAY,
+     *  NCOL,NROW,NLAY,IOUTS,LAYHDT,
+cellam
+     *  MOCTYPE,DELCOL,DELROW,TEMP,RHS,CONC)
+cellam
+C
+C*************************************************************************
+C STORAGE TERM UPDATING
+C*************************************************************************
+C
+      DOUBLE PRECISION HNEW
+C
+      DIMENSION HNEW(NCOL,NROW,NLAY),
+     *  IBOUND(NCOL,NROW,NLAY),
+     *  HOLD(NCOL,NROW,NLAY),
+     *  BOTM(NCOL,NROW,0:NBOTM),SC1(NCOL,NROW,NLAY),
+     *  SC2(NCOL,NROW,NLAY),TEMP(NSCOL,NSROW,NSLAY),
+     *  THCK(NSCOL,NSROW,NSLAY),RHS(NSCOL,NSROW,NSLAY),
+     *  POR(NSCOL,NSROW,NSLAY),CONC(NSCOL,NSROW,NSLAY)
+C
+      DIMENSION BUFF(NCOL,NROW,NLAY),LAYHDT(NLAY)
+C
+cellam
+      DIMENSION DELCOL(NCOL),DELROW(NROW)
+      COMMON /ELLAM/ CINV,RINV,BINV,HCINV,HRINV,HBINV,WATVOL,
+     *               STINIT,ADINIT,STMASS,ADMASS,OLMASS,
+     *               AZERO,
+     *               NSC,NSR,NSL,NT,NCTF,NRTF,NLTF,
+     *               NEIGHB(8,2),NSLOPE(3),
+     *               IDTOP,IDMAX,NCOEF,NSCH,NSRH,NSLH
+cellam
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+      COMMON /GWT/ CDEL,RDEL,CNOFLO,CELDIS,FZERO,NZCRIT
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+C*************************************************************************
+C
+      ARINV=1.D0/(CDEL*RDEL)
+      DTOVAR=DELT*ARINV
+C
+C  UPDATE FLUID STORAGE TERMS
+C
+C  LOOP FOR ALL LAYERS TO SET TOP COUNTER
+      DO 40 K=1,NLAY
+      KS=K-ISLAY1+1
+      IF(KS.LE.0.OR.KS.GT.NSLAY) GO TO 40
+C
+      IF(LAYHDT(K).EQ.1) THEN
+C
+C  FOR UNCONFINED LAYERS, PRIMARY STORAGE COEFFICIENT IS ASSUMED
+C   TO BE SPECIFIC YIELD
+C   UPDATE APPLIED TO SATURATED THICKNESS, POROSITY CONSTANT
+C
+         DO 10 IS=1,NSROW
+         I=IS+ISROW1-1
+         DO 10 JS=1,NSCOL
+         J=JS+ISCOL1-1
+C  SKIP IF INACTIVE AT ENDING TIME, THIS MAY TRAP PARTICLES
+         IF(IBOUND(J,I,K).LE.0) GO TO 10
+         IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+		   THCK(JS,IS,KS)=THCK(JS,IS,KS)-
+     *         BUFF(J,I,K)*DTOVAR/POR(JS,IS,KS)
+C  GWT NOT COMPATIBLE WITH REWETTING OPTION;  STOP IF CELLS DEWATER
+		   IF(THCK(JS,IS,KS).LE.0.0) THEN
+			 WRITE(IOUTS,*) ' ERROR, ACTIVE CELL DEWATERED FOR ',
+     *            'TRANSPORT'
+			 WRITE(IOUTS,*) 'js,is,ks',js,is,ks
+			 WRITE(IOUTS,*) 'buff,delt,delc,delr,thck,por,ibound',
+     *	        BUFF(J,I,K),
+     *	        DELT,DELCOL(J),DELROW(I),THCK(JS,IS,KS),por(js,is,ks),
+     *            ibound(j,i,k)
+			  STOP ' ERROR IN ROUTINE UPDATE AT DEWATERING 1'
+		   END IF
+         ELSEIF (MOCTYPE.EQ.3) THEN
+             THCK(JS,IS,KS)=THCK(JS,IS,KS)-
+     *         (BUFF(J,I,K)*DELT)/(DELCOL(J)*DELROW(I)*POR(JS,IS,KS))
+C  ELLAM COMPATIBLE WITH REWETTING OPTION
+             IF(THCK(JS,IS,KS).LE.0.0) THEN
+                THCK(JS,IS,KS)=TEMP(JS,IS,KS)
+                IBOUND(J,I,K)=0
+             END IF
+         ENDIF
+   10    CONTINUE
+      ELSE IF(LAYHDT(K).EQ.0) THEN
+C  FOR CONVERTIBLE LAYERS, PRIMARY IS SPECIFIC STORATIVITY,
+cgzh also confined
+C   SECONDARY IS SPECIFIC YIELD, BOTH POROSITY AND THICKNESS MAY CHANGE
+C
+         DO 30 IS=1,NSROW
+         I=IS+ISROW1-1
+         DO 30 JS=1,NSCOL
+         J=JS+ISCOL1-1
+         IF(IBOUND(J,I,K).LE.0) GO TO 30
+         TOPL=BOTM(J,I,LBOTM(K)-1)
+         HTNEW=HNEW(J,I,K)-TOPL
+         HTOLD=HOLD(J,I,K)-TOPL
+C
+C  CHANGE POROSITY FOR HEAD CHANGE ABOVE TOP
+C  CHANGE THICKNESS FOR HEAD CHANGE BELOW TOP
+C
+       IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+C  BOTH OLD AND NEW HEAD ABOVE TOP, CHANGE POROSITY ONLY
+         IF(HTNEW.GT.0.0.AND.HTOLD.GE.0.0) THEN
+cgzh wrong sign          POR(JS,IS,KS)=POR(JS,IS,KS)+BUFF(J,I,K)*DTOVAR/THCK(JS,IS,KS)
+          POR(JS,IS,KS)=POR(JS,IS,KS)-BUFF(J,I,K)*DTOVAR/THCK(JS,IS,KS)
+C
+C  OLD HEAD BELOW TOP, NEW HEAD ABOVE TOP
+         ELSE IF(HTNEW.GT.0.0.AND.HTOLD.LT.0.0) THEN
+C  FIRST, INCREASE THICKNESS
+            THCK(JS,IS,KS)=THCK(JS,IS,KS)-SC2(J,I,K)*HTOLD*ARINV
+     *                       /POR(JS,IS,KS)
+C  THEN INCREASE POROSITY
+            POR(JS,IS,KS)=POR(JS,IS,KS)+SC1(J,I,K)*HTNEW*ARINV
+     *                      /THCK(JS,IS,KS)
+C
+C  BOTH OLD AND NEW HEAD BELOW TOP, CHANGE THICKNESS ONLY
+         ELSE IF(HTNEW.LE.0.0.AND.HTOLD.LT.0.0) THEN
+          THCK(JS,IS,KS)=THCK(JS,IS,KS)+BUFF(J,I,K)*DTOVAR/POR(JS,IS,KS)
+C  OLD HEAD ABOVE TOP, NEW HEAD BELOW TOP
+         ELSE IF(HTNEW.LT.0.0.AND.HTOLD.GT.0.0) THEN
+C  FIRST DECREASE POROSITY
+            POR(JS,IS,KS)=POR(JS,IS,KS)-SC1(J,I,K)*HTOLD*ARINV
+     *                                    /THCK(JS,IS,KS)
+C  THEN DECREASE THICKNESS
+            THCK(JS,IS,KS)=THCK(JS,IS,KS)+SC2(J,I,K)*HTNEW*ARINV
+     *                                      /POR(JS,IS,KS)
+         END IF
+       ELSEIF(MOCTYPE.EQ.3) THEN
+         IF(HTNEW.GT.0.0.AND.HTOLD.GE.0.0) THEN
+          POR(JS,IS,KS)=POR(JS,IS,KS)+(BUFF(J,I,K)*DELT)/
+     *                  (DELCOL(J)*DELROW(I)*THCK(JS,IS,KS))
+         ELSE IF(HTNEW.GT.0.0.AND.HTOLD.LT.0.0) THEN
+            THCK(JS,IS,KS)=THCK(JS,IS,KS)-(SC2(J,I,K)*HTOLD)
+     *                       /(DELCOL(J)*DELROW(I)*POR(JS,IS,KS))
+            POR(JS,IS,KS)=POR(JS,IS,KS)+(SC1(J,I,K)*HTNEW)
+     *                      /(DELCOL(J)*DELROW(I)*THCK(JS,IS,KS))
+         ELSE IF(HTNEW.LE.0.0.AND.HTOLD.LT.0.0) THEN
+          THCK(JS,IS,KS)=THCK(JS,IS,KS)+(BUFF(J,I,K)*DELT)/
+     *                   (DELCOL(J)*DELROW(I)*POR(JS,IS,KS))
+         ELSE IF(HTNEW.LT.0.0.AND.HTOLD.GT.0.0) THEN
+            POR(JS,IS,KS)=POR(JS,IS,KS)-(SC1(J,I,K)*HTOLD)
+     *                    /(DELCOL(J)*DELROW(I)*THCK(JS,IS,KS))
+            THCK(JS,IS,KS)=THCK(JS,IS,KS)+(SC2(J,I,K)*HTNEW)
+     *                     /(DELCOL(J)*DELROW(I)*POR(JS,IS,KS))
+         ENDIF
+       ENDIF
+C  GWT NOT COMPATIBLE WITH REWETTING OPTION;  STOP IF CELLS DEWATER
+         IF(POR(JS,IS,KS).LE.0.0.OR.THCK(JS,IS,KS).LE.0.0) THEN
+            WRITE(IOUTS,*) ' ERROR, ACTIVE CELL DEWATERED FOR TRANSPORT'
+            WRITE(IOUTS,*) 'js,is,ks',js,is,ks
+            WRITE(IOUTS,*) 'buff,delt,delc,delr,thck,por,ibound'
+     *	  ,BUFF(J,I,K),
+     *	  DELT,DELCOL(J),DELROW(I),THCK(JS,IS,KS),por(js,is,ks),
+     *      ibound(j,i,k)
+            STOP ' IN ROUTINE UPDATE AT DEWATERING 2'
+         END IF
+   30    CONTINUE
+      END IF
+   40 CONTINUE
+C ADDITIONAL ELLAM LOOP
+      IF(MOCTYPE.EQ.3) THEN
+	 DO KS=1,NSLAY
+        K=ISLAY1+KS-1
+        DO IS=1,NSROW
+          I=ISROW1+IS-1
+          DO JS=1,NSCOL
+            J=ISCOL1+JS-1
+            IF (IBOUND(J,I,K).NE.0) THEN
+              RHS(JS,IS,KS)=TEMP(JS,IS,KS)/POR(JS,IS,KS)
+            ENDIF
+          ENDDO
+        ENDDO
+       ENDDO
+      END IF
+      RETURN
+      END
+C
+C
+C  MOC6ST   SET MOVE TIME
+C*************************************************************************
+C
+      SUBROUTINE GWT1BAS6ST(SRCFLO,SNKFLO,RF,POR,THCK,
+     *  VCMAX,VRMAX,VLMAX,TLMIN,TIMV,NTIMV,ITCD,
+     *  MAXVCJ,MAXVCI,MAXVCK,MAXVRJ,MAXVRI,MAXVRK,MAXVLJ,MAXVLI,MAXVLK,
+     *  TIMDC,NTIMD,
+     *  NMOV,SUMTCH,NSCOL,NSROW,NSLAY,IOUTS,KSTP,KPER,
+     *  TOTIM,DELT,NODISP,DIFFUS,DECAY,ICONLY,MOCTYPE,
+     *  INDP,TIMDP,JMAXDP,IMAXDP,KMAXDP,
+     *  KKPER,IBOUND,CONC,SBVL,NCOL,NROW,NLAY,JRF,NIUNIT)
+C
+C*************************************************************************
+C
+C
+      DIMENSION
+     *  SRCFLO(NSCOL,NSROW,NSLAY),SNKFLO(NSCOL,NSROW,NSLAY),
+     *  RF(NSCOL,NSROW,NSLAY),POR(NSCOL,NSROW,NSLAY),
+     *  THCK(NSCOL,NSROW,NSLAY)
+cgzh debug double sbvl
+      DOUBLE PRECISION SBVL
+      DIMENSION IBOUND(NCOL,NROW,NLAY),
+     *  CONC(NSCOL,NSROW,NSLAY),SBVL(6,NIUNIT)
+C
+      DOUBLE PRECISION DECAY
+      COMMON /GWT/ CDEL,RDEL,CNOFLO,CELDIS,FZERO,NZCRIT
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+cellam
+      COMMON /ELLAM/ CINV,RINV,BINV,HCINV,HRINV,HBINV,WATVOL,
+     *               STINIT,ADINIT,STMASS,ADMASS,OLMASS,
+     *               AZERO,
+     *               NSC,NSR,NSL,NT,NCTF,NRTF,NLTF,
+     *               NEIGHB(8,2),NSLOPE(3),
+     *               IDTOP,IDMAX,NCOEF,NSCH,NSRH,NSLH
+CMOCWT
+      INCLUDE 'ptwt.inc'
+C
+C*************************************************************************
+C
+C  SET SOURCE TIME STEPPING CRITERION
+C4  TIME STEPPING
+C
+C  COMPUTE LIMITING TIME STEP FOR INJECTION
+C
+C  ADD CONSTANT SINK/SOURCE TERMS TO ARRAYS
+C  SIGN OF MODFLOW NOW, SOURCES POSITIVE INTO AQUIFER
+C  SRCFLO = QSOURCE / ( POR THCK AREA RF )    UNITS 1/T
+C
+cellam  SKIP IF ELLAM
+      IF(MOCTYPE.EQ.3) GO TO 37
+cellam
+      MAXJ=0
+      MAXI=0
+      MAXK=0
+      TMV=DELT*1.0E5
+      NTIMIJ=0
+C
+C  SKIP IF NO SINK/SOURCES WITHIN TRANSPORT SUBGRID
+      IF(ICONLY.EQ.1) GO TO 27
+      AREA=CDEL*RDEL
+        DO 22 KS=1,NSLAY
+        DO 22 IS=1,NSROW
+        DO 22 JS=1,NSCOL
+C  LIMITING TIME STEP FOR INJECTION
+        DIV=SRCFLO(JS,IS,KS)
+        IF(DIV.LE.0.0) GO TO 22
+        TDIV=RF(js,is,KS)*POR(JS,IS,KS)*THCK(JS,IS,KS)*AREA/DIV
+        IF(TDIV.GE.TMV) GO TO 22
+        TMV=TDIV
+        MAXJ=JS+ISCOL1-1
+        MAXI=IS+ISROW1-1
+        MAXK=KS+ISLAY1-1
+C
+C  CHECK THAT IGENPT IS NOT ZERO ONLY IN SINK OR SOURCE CELLS
+   22    CONTINUE
+C
+       NTIMIJ=DELT/TMV
+       IF(MOCTYPE.EQ.2) NTIMIJ=DELT/(TMV*2)
+       NTIMIJ=NTIMIJ+1
+C
+cgzh putting injection stability back in, srcfix2
+c       if (ptwton.eq.1) ntimij=1
+C  
+C  PRINT STABILITY CRITERIA
+C
+       WRITE(IOUTS,390)
+       WRITE(IOUTS,410) VCMAX,VRMAX,VLMAX,TLMIN
+       WRITE(IOUTS,420) TIMV,NTIMV
+       IF(ITCD.EQ.1) THEN
+          MI=MAXVRI-1
+          WRITE(IOUTS,534) MAXVRJ,MAXVRI,MAXVRK,MAXVRJ,MI,MAXVRK
+       ELSE IF(ITCD.EQ.0) THEN
+          MJ=MAXVCJ-1
+          WRITE(IOUTS,535) MAXVCJ,MAXVCI,MAXVCK,MJ,MAXVCI,MAXVCK
+       ELSE
+          MK=MAXVLK-1
+          WRITE(IOUTS,536) MAXVLJ,MAXVLI,MAXVLK,MAXVLJ,MAXVLI,MK
+       END IF
+       IF (MOCTYPE.EQ.1) THEN
+         WRITE(IOUTS,430) TIMDC,NTIMD
+       END IF
+       IF(MAXJ.GT.0.AND.MAXI.GT.0.AND.MAXK.GT.0) THEN
+cgzh putting injection stability back in, srcfix2
+c         IF (PTWTON.NE.1) THEN
+             WRITE(IOUTS,1098) MAXJ,MAXI,MAXK,TMV,NTIMIJ
+c	   ELSE
+c	       WRITE(IOUTS,1099) MAXJ,MAXI,MAXK
+c         END IF
+       ELSE
+           WRITE(IOUTS,*) 'THERE ARE NO FLUID SOURCES IN THE TRANSPORT'
+     *                    ,' SUBGRID'
+       END IF
+  390 FORMAT(1H ///,10X,29HSTABILITY CRITERIA --- M.O.C.)
+  410 FORMAT(/5X,35HMAXIMUM FLUID VELOCITIES:  C-VEL = ,1PE9.2,5X,
+     1  8HR-VEL = ,1PE9.2,'     L-VEL = ',1PE9.2/
+     *' MINIMUM TIME TO TRAVEL THCK = ',1PE9.2)
+  420 FORMAT(/8H TIMV = ,1PE9.2,5X,10HNTIMV  =  ,I5/)
+  430 FORMAT(/8H TIMD = ,1PE9.2,5X,10HNTIMD  =  ,I5/)
+  534 FORMAT(1H ,4X,52HMAX. R-VEL. IS CONSTRAINT AND OCCURS BETWEEN NODE
+     1S (,I4,1H,,I4,1H,,I4,7H) AND (,I4,1H,,I4,1H,,I4,1H))
+  535 FORMAT(1H ,4X,52HMAX. C-VEL. IS CONSTRAINT AND OCCURS BETWEEN NODE
+     1S (,I4,1H,,I4,1H,,I4,7H) AND (,I4,1H,,I4,1H,,I4,1H))
+  536 FORMAT(1H ,4X,52HMAX. L-VEL. IS CONSTRAINT AND OCCURS BETWEEN NODE
+     1S (,I4,1H,,I4,1H,,I4,7H) AND (,I4,1H,,I4,1H,,I4,1H))
+ 1098 FORMAT(/,' MAXIMUM INJECTION OCCURS IN J,I,K=',3I4//
+     *' TMV  = ',1PE9.2,5X,10HNTIMIJ =  ,  I5/)
+ 1099 FORMAT(/,' MAXIMUM INJECTION OCCURS IN J,I,K=',3I4/)
+C
+C  SKIP TO HERE IF NO SINK/SOURCES WITHIN TRANSPORT SUBGRID
+   27 CONTINUE
+C********************************************************************
+C
+      IF(INDP.GT.0) THEN
+        NTIMDP=DELT/TIMDP
+          IF(MOCTYPE.GT.1) NTIMDP=0
+        WRITE(IOUTS,440) JMAXDP,IMAXDP,KMAXDP,TIMDP,NTIMDP
+  440 FORMAT(/,' MAXIMUM POTENTIAL DOUBLE POROSITY EXCHANGE'/
+     *' OCCURS IN J,I,K=',3I4//
+     *' TIMDP= ',1PE9.2,5X,'NTIMDP = ',I5/)
+      END IF
+C  SET DEFAULT NUMBER OF DISPERSION STEPS, IF NODISP AND DIFFUS=0
+      IF(NODISP.EQ.1.AND.DIFFUS.EQ.0.0) NTIMD=0
+      IF(MOCTYPE.GT.1) NTIMD=0
+C
+C  WRITE LIMITING NUMBER OF TIME STEPS
+cgzh putting injection stability back in, srcfix2
+c      IF (PTWTON.NE.1)THEN
+       IF (MOCTYPE.EQ.1) THEN
+        WRITE(IOUTS,621) NTIMV,NTIMD,NTIMIJ
+         IF (INDP.GT.0) THEN
+            WRITE(IOUTS,721) NTIMDP
+  721 FORMAT(' DOUBLE POROSITY EXCHANGE ',I10)
+           IF(NTIMDP.GT.0) THEN
+             NTIMD=NTIMD+NTIMDP
+             NTIMIJ=NTIMIJ+NTIMDP
+             WRITE(IOUTS,722) 
+             WRITE(IOUTS,621) NTIMV,NTIMD,NTIMIJ
+           END IF
+722   FORMAT(' NUMBER OF REQUIRED DISPERSION AND INJECTION STEPS',
+     *    ' ARE INCREASED'/
+     *    '  BY DOUBLE POROSITY STEPS FOR STABILITY LIMIT.')
+         END IF
+       ELSE
+        WRITE(IOUTS,625) NTIMV,NTIMIJ
+       END IF
+C
+c      ELSE
+c       IF (MOCTYPE.EQ.1) THEN
+c        WRITE(IOUTS,622) NTIMV,NTIMD
+c         IF (INDP.GT.0) THEN
+c            WRITE(IOUTS,721) NTIMDP
+c           IF(NTIMDP.GT.0) THEN
+c             NTIMD=NTIMD+NTIMDP
+cC             NTIMIJ=NTIMIJ+NTIMDP
+c             WRITE(IOUTS,722) 
+c             WRITE(IOUTS,622) NTIMV,NTIMD
+c           END IF
+c         END IF
+c       ELSE
+c        WRITE(IOUTS,626) NTIMV
+c       END IF
+c      END IF
+  621 FORMAT(/,' NUMBER OF MOVES FOR ALL STABILITY CRITERIA:'/
+     *'    CELDIS  DISPERSION   INJECTION'/
+     *I10,2X,I10,2X,I10/)
+  622 FORMAT(/,' NUMBER OF MOVES FOR ALL STABILITY CRITERIA:'/
+     *'    CELDIS  DISPERSION  '/
+     *I10,2X,I10,2X/)
+  625 FORMAT(/,' NUMBER OF MOVES FOR ALL STABILITY CRITERIA:'/
+     *'    CELDIS   INJECTION'/
+     *I10,2X,I10/)
+  626 FORMAT(/,' NUMBER OF MOVES FOR ALL STABILITY CRITERIA:'/
+     *'    CELDIS  '/
+     *I10,2X/)
+C
+      NMOV=MAX0(NTIMV,NTIMD,NTIMIJ)
+      IF(NTIMV.EQ.NMOV) WRITE(IOUTS,1001)
+ 1001 FORMAT(' CELDIS IS LIMITING')
+      IF(NTIMD.EQ.NMOV) WRITE(IOUTS,1002)
+ 1002 FORMAT(' DISPERSION IS LIMITING')
+      IF(NTIMIJ.EQ.NMOV) WRITE(IOUTS,1003)
+ 1003 FORMAT(' INJECTION IS LIMITING')
+      IF(INDP.GT.0) THEN
+        IF(NTIMDP.EQ.NMOV) WRITE(IOUTS,1005)
+      END IF
+ 1005 FORMAT(' DOUBLE POROSITY ALONE IS LIMITING')
+      GO TO 47
+cellam
+C  SKIP TO HERE IF ELLAM
+   37 CONTINUE
+C  WRITE LIMITING NUMBER OF TIME STEPS
+      WRITE(IOUTS,631) NTIMV
+  631 FORMAT(/,' NUMBER OF MOVES FOR CELDIS CRITERIA:'/
+     *I10/)
+      NMOV=MAX0(NTIMV,1)
+      IF(NTIMV.GT.NMOV) WRITE(IOUTS,1011)
+ 1011 FORMAT(' CELDIS IS LIMITING')
+cellam
+   47 CONTINUE
+      IF(NMOV.EQ.1) WRITE(IOUTS,1004)
+ 1004 FORMAT(   /10X,63H*TIME INCREMENT FOR SOLUTE-TRANSPORT EQUALS TIME
+     1 STEP FOR FLOW*)
+      TIMV=DELT/REAL(NMOV)
+C
+      WRITE(IOUTS,675) KSTP,KPER
+  675 FORMAT(1H /,10X,'TIME STEP ',I4,' IN STRESS PERIOD ',I4)
+      WRITE(IOUTS,680) NMOV,TIMV
+  680 FORMAT(1H /,10X,'NO. OF PARTICLE MOVES REQUIRED TO COMPLETE',
+     1  ' THIS TIME STEP  = ',I6/
+     *11X,' MOVE TIME STEP (TIMV)=',1PE20.12/)
+      THALF=0.0
+      IF(DECAY.GT.0.0) THALF=0.6931471/DECAY
+      IF(THALF.GT.0.0.AND.THALF.LT.TIMV) WRITE(IOUTS,685)
+  685 FORMAT(1H /,5X,'*** CAUTION ***  DECAY HALF-LIFE IS LESS THAN',
+     *' TIMV'/
+     11X,24HACCURACY MAY BE AFFECTED/
+     *1X,'(REDUCE TIMV BY DECREASING CELDIS)')
+      WRITE(IOUTS,'(/)')
+C
+C  SET STARTING TIME FOR TRANSPORT EQUATION SOLUTION
+      SUMTCH=TOTIM-DELT
+C
+      RETURN
+      END
+C
+C
+C  MOC6AD  UPDATE TRANSPORT TIME
+C*************************************************************************
+C
+      SUBROUTINE MOC6AD(
+     *  CONC,CNOLD,NPCELL,NPOLD,
+     *  NSCOL,NSROW,NSLAY,MOCTYPE,
+     *  TIMV,SUMTCH,IOUTS,IMOV,NMOV,TOTIM,SAGE)
+C
+C*************************************************************************
+C
+      DIMENSION
+     *    CONC(NSCOL,NSROW,NSLAY),CNOLD(NSCOL,NSROW,NSLAY),
+     *  NPCELL(NSCOL,NSROW,NSLAY),NPOLD(NSCOL,NSROW,NSLAY)
+cellam
+      COMMON /ELLAM/ CINV,RINV,BINV,HCINV,HRINV,HBINV,WATVOL,
+     *               STINIT,ADINIT,STMASS,ADMASS,OLMASS,
+     *               AZERO,
+     *               NSC,NSR,NSL,NT,NCTF,NRTF,NLTF,
+     *               NEIGHB(8,2),NSLOPE(3),
+     *               IDTOP,IDMAX,NCOEF,NSCH,NSRH,NSLH
+cellam
+C
+C*************************************************************************
+C
+C   SET COLD=CONC
+C   SET NPOLD=NPCELL
+C
+      SUMTCH=SUMTCH+TIMV
+      IF(IMOV.EQ.NMOV) SUMTCH=TOTIM
+C
+C  ADVANCE CONCENTRATION AND NUMBER OF PARTICLES PER CELL
+C
+      DO 10 KS=1,NSLAY
+      DO 10 IS=1,NSROW
+      DO 10 JS=1,NSCOL
+cellam
+      IF(MOCTYPE.EQ.1.OR.MOCTYPE.EQ.2) THEN
+        NPOLD(JS,IS,KS)=NPCELL(JS,IS,KS)
+        NPCELL(JS,IS,KS)=0
+      ENDIF
+cellam
+      CNOLD(JS,IS,KS)=CONC(JS,IS,KS)
+   10 CONTINUE
+C
+cellam
+C  INITIALIZE ACCUMULATORS FOR STORED, ADSORBED MASS THIS TIME STEP
+      STMASS = 0D0
+      ADMASS = 0D0
+      SAGE = 0D0
+C
+cellam
+      RETURN
+      END
+C
+C
+C  MOC5AP  CHANGE CONC OF NODES AND PARTICLES
+C*************************************************************************
+C
+      SUBROUTINE MOC5AP(IBOUND,
+     *  PC,PR,PL,PCONC,
+     *  CONC,IGENPT,
+     *  SUMC,CNCNC,
+     *  NSCOL,NSROW,NSLAY,NPMAX,
+     *  NCOL,NROW,NLAY,IOUTS,NP)
+C
+C*************************************************************************
+C
+C  CHANGE CONC OF NODES AND PARTICLES DUE TO DISPERSION AND SINK/SOURCES
+C
+      DOUBLE PRECISION SUMC
+C
+      DIMENSION
+     *  IBOUND(NCOL,NROW,NLAY),
+     *  PC(NPMAX),PR(NPMAX),PL(NPMAX),PCONC(NPMAX),
+     *  CONC(NSCOL,NSROW,NSLAY),IGENPT(NSCOL,NSROW,NSLAY),
+     *  SUMC(NSCOL,NSROW,NSLAY), CNCNC(NSCOL,NSROW,NSLAY)
+C
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+C*************************************************************************
+C
+cgzh debug 
+!         sumcnm=0.0
+      DO 65 KS=1,NSLAY
+      K=KS+ISLAY1-1
+      DO 65 IS=1,NSROW
+      I=IS+ISROW1-1
+      DO 65 JS=1,NSCOL
+      J=JS+ISCOL1-1
+      IF(IBOUND(J,I,K).EQ.0) GO TO 65
+cgzh debug 
+!         sumcnm=sumcnm+CNCNC(JS,IS,KS)
+C
+C     ****************************************************************
+C     ---CHANGE CONCENTRATION AT NODE---
+C
+C  CNCPCT IS PERCENT CHANGE IN CONCENTRATION OF NODE
+C   USE CNCPCT TO CHANGE PARTICLE CONCENTRATIONS IF CONC DROPPING
+C
+      CNCPCT=0.0
+cold     IF(CONC(JS,IS,KS).GT.0.0) CNCPCT=CNCNC(JS,IS,KS)/CONC(JS,IS,KS)
+      IF(CONC(JS,IS,KS).GT.0.0.AND.CNCNC(JS,IS,KS).LT.0.0) 
+     *   CNCPCT=CNCNC(JS,IS,KS)/CONC(JS,IS,KS)
+      CONC(JS,IS,KS)=CONC(JS,IS,KS)+CNCNC(JS,IS,KS)
+      SUMC(JS,IS,KS)=0.0
+C  FOR DROPPING CONC, STORE PERCENT CHANGE IN SUMC ARRAY TO USE FOR 
+C     PARTICLES
+      IF(CNCPCT.LT.0.0) SUMC(JS,IS,KS)=CNCPCT
+C
+C  END OF LOOP FOR CHANGES IN NODE CONCENTRATIONS
+C
+   65 CONTINUE
+cgzh debug output
+c      write(iouts,*) 'sumcnm=',sumcnm
+C     ****************************************************************
+C     ---CHANGE CONCENTRATION OF PARTICLES---
+      DO 180 IP=1,NP
+      IF(PC(IP).EQ.0.0) GO TO 180
+      J=PC(IP)+0.5
+      JS=J-ISCOL1+1
+      I=ABS(PR(IP))+0.5
+      IS=I-ISROW1+1
+      K=PL(IP)+0.5
+      KS=K-ISLAY1+1
+C     ---UPDATE CONC. OF PTS. IN SINK/SOURCE CELLS---
+C  IF IN FIXED HEAD CELL, OR INACTIVE CELL, SET PCONC TO CELL CONC
+      IF(IBOUND(J,I,K).LE.0.OR.IGENPT(JS,IS,KS).NE.0) THEN
+         PCONC(IP)=CONC(JS,IS,KS)
+C  USE SPECIAL PROPORTIONAL REDUCTION FOR DECREASES
+C  CAN PROBABLY GET RID OF CNCNC ARRAY IF USING EXPLICIT STUFF
+      ELSE IF(CNCNC(JS,IS,KS).LT.0.0.AND.
+     * CONC(JS,IS,KS).GT.0.0.AND.SUMC(JS,IS,KS).GE.-1.E0) THEN
+C  FOR FUTURE, CAN CHANGE SUMC TO STORE 1+CNCPCT IN CELLS, SAVE ADDITION
+C  FOR REDUCTIONS DROP ALL PARTICLE CONCENTRATIONS PROPORTIONALLY
+         PCONC(IP)=PCONC(IP)*(1.E0+SUMC(JS,IS,KS))
+      ELSE
+C  FOR OTHER CASES, ADD NODE CHANGE TO PARTICLES
+         PCONC(IP)=PCONC(IP)+CNCNC(JS,IS,KS)
+      END IF
+  180 CONTINUE
+C
+C     ****************************************************************
+      RETURN
+C     ****************************************************************
+      END
+C
+C   BNINIT -- INITIALIZE CONCENTRATION ON PARALLEL BOUNDARY FACES TO
+C             CONCENTRATIONS OF INTERIOR NODES
+C     ****************************************************************
+C
+      SUBROUTINE BNINIT(ISTRT,IEND,IPTR1,IPTR2,IDEL,CBNDY,
+     *                  LBNDY,CONC,NTFACE,NODESS)
+C
+      DIMENSION CBNDY(NTFACE),CONC(NODESS),LBNDY(NTFACE)
+C
+      DO 100 N1=ISTRT,IEND,2
+      N=N1
+      CBNDY(N)=CONC(IPTR1)
+      LBNDY(N)=IPTR1
+      IPTR1=IPTR1+IDEL
+      N=N1+1
+      CBNDY(N)=CONC(IPTR2)
+      LBNDY(N)=IPTR2
+      IPTR2=IPTR2+IDEL
+100   CONTINUE
+C
+      RETURN
+      END
+C
+C
+C
+C  GWT1BAS6CH  PREPARE CH INFO
+C     ******************************************************************
+C
+      SUBROUTINE GWT1BAS6CH(IBOUND,IFXHED,ICONLY,
+     *  NSCOL,NSROW,NSLAY,
+     *  NCOL,NROW,NLAY,IOUTS)
+C
+C     ******************************************************************
+C
+C    INITIALIZE CONSTANT HEAD INFO 
+C
+C     ------------------------------------------------------------------
+C
+      DIMENSION IBOUND(NCOL,NROW,NLAY)
+C
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+C
+C     ------------------------------------------------------------------
+C  IFXHED IS FLAG FOR FIXED HEAD NODES WITHIN TRANSPORT SUBGRID
+      IFXHED=0
+      DO 403 KS=1,NSLAY
+       K=KS+ISLAY1-1
+       DO 402 IS=1,NSROW
+        I=IS+ISROW1-1
+        DO 401 JS=1,NSCOL
+         J=JS+ISCOL1-1
+         IF(IBOUND(J,I,K).LT.0) IFXHED=IFXHED+1
+  401   CONTINUE
+  402  CONTINUE
+  403 CONTINUE
+C
+C  IF ICONLY=1, THERE SHOULD BE NO FIXED HEADS WITHIN SUBGRID
+      IF(ICONLY.EQ.1.AND.IFXHED.GT.0) THEN
+       WRITE(IOUTS,*) ' ERROR, ICONLY=1 AND THERE ARE FIXED HEADS'
+       WRITE(IOUTS,*) '   WITHIN THE SUBGRID FOR TRANSPORT, STOPPING'
+       WRITE(IOUTS,*) ' NO. OF FIXED HEADS WITHIN SUBGRID=',IFXHED
+       STOP
+      END IF
+C
+C9------RETURN
+ 1000 RETURN
+      END
+C
+C
+C
+C     ***************************************************************
+C
+C
+C
+C
+C  GWT1BAS6WTF  SET WATER TABLE FACTOR
+C     ******************************************************************
+C
+      SUBROUTINE GWT1BAS6WTF(IBOUND,
+     *   NCOL,NROW,NLAY,NSCOL,NSROW,NSLAY,
+     *   HNEW,HOLD,BOTM,NBOTM,
+     *   NP,NPMAX,PC,PR,PL,
+     *   IOUTS,WTFAC,ISS,KKPER,
+     *   IWDFLG,IPERGWT,KKSTP)
+C
+C     ******************************************************************
+C
+C    SET WATER TABLE FACTOR USED TO ADJUST K LOCATION OF PARTICLES
+C
+C     ------------------------------------------------------------------
+C
+      DOUBLE PRECISION HNEW,H,TOP,BOT
+      DIMENSION HNEW(NCOL,NROW,NLAY),HOLD(NCOL,NROW,NLAY),
+     *  BOTM(NCOL,NROW,0:NBOTM),WTFAC(NSCOL,NSROW,NSLAY)
+      DIMENSION IBOUND(NCOL,NROW,NLAY)
+      DIMENSION PC(NPMAX),PR(NPMAX),PL(NPMAX)
+C
+      COMMON /SUBGRD/
+     *  ISCOL1,ISCOL2,ISROW1,ISROW2,ISLAY1,ISLAY2,ISUBGD
+      COMMON /DISCOM/LBOTM(999),LAYCBD(999)
+C
+C     ------------------------------------------------------------------
+C
+      DO 10 KS=1,NSLAY
+      K=KS+ISLAY1-1
+      DO 10 IS=1,NSROW
+      I=IS+ISROW1-1
+      DO 10 JS=1,NSCOL
+      J=JS+ISCOL1-1
+C INITIALIZE
+      WTFAC(JS,IS,KS)=0.0
+      IF(IBOUND(J,I,K).NE.0) THEN
+C SET FLAG FOR WT ADJUSTMENT IF WT CELL AND HNEW < TOP
+        IUPDATE=0
+        IF(K.EQ.1) THEN
+	    IF(HNEW(J,I,K).LT.BOTM(J,I,LBOTM(K)-1)) THEN
+            IUPDATE=1
+          END IF
+C IF NOT IN FIRST LAYER, ONLY WT IF CELL ABOVE IS DRY
+	  ELSE IF (IBOUND(J,I,K-1).EQ.0) THEN
+	    IF(HNEW(J,I,K).LT.BOTM(J,I,LBOTM(K)-1)) THEN
+          IUPDATE=1
+          END IF
+        END IF 
+C WATER TABLE FACTOR (WTFAC) IS THE PERCENTAGE OF THE CELL HEIGHT THAT
+C   IS SATURATED: e.g. bottom=0, top=10, head= 6, WTFAC= 0.6
+C THIS FACTOR IS USED FOR PARTICLE OUTPUT
+        IF(IUPDATE.EQ.1) THEN
+C IF NEW HEAD IS ABOVE THE TOP, SKIP
+          H=HNEW(J,I,K)
+          IF(H.GE.BOTM(J,I,LBOTM(K)-1)) GO TO 10
+C
+		BOT=BOTM(J,I,LBOTM(K))
+	    TOP=BOTM(J,I,LBOTM(K)-1)
+          WTFAC(JS,IS,KS)=((H-BOT)/(TOP-BOT))
+        END IF
+      END IF
+   10 CONTINUE
+C  skip this 
+      GO TO 1000
+C
+C  WT ADJUSTMENT
+C
+      DO 20 IP=1,NP
+      OLDC=PC(IP)
+C  SKIP PARTICLE IF C COORDINATE IS ZERO
+      IF(OLDC.LE.0.0D0) GO TO 20
+C     ***************************************************************
+C           ---COMPUTE OLD LOCATION---
+      J=INT(OLDC+0.5D0)
+      JS=J-ISCOL1+1
+C  IORIG SET TO 1 FOR PARTICLES ORIGINATING IN THIS CELL
+C   ORIGINAL PARTICLES HAVE NEGATIVE R COORDINATE
+      OLDR=PR(IP)
+      IF(OLDR.LT.0.0D0) THEN
+         OLDR=-OLDR
+      END IF
+      I=INT(OLDR+0.5D0)
+      IS=I-ISROW1+1
+      OLDL=PL(IP)
+      K=INT(OLDL+0.5D0)
+      KS=K-ISLAY1+1
+      IF(JS.LT.1.OR.JS.GT.NSCOL.OR.IS.LT.1.OR.IS.GT.NSROW.OR.
+     *  KS.LT.1.OR.KS.GT.NSLAY) THEN
+         WRITE(IOUTS,*) ' IP,JS,IS,KS=',IP,JS,IS,KS
+         WRITE(IOUTS,*) ' OLDC,OLDR,OLDL=',OLDC,OLDR,OLDL
+         WRITE(IOUTS,*) ' PARTICLE ERROR MOVE, STOPPING'
+         STOP ' PARTICLE ERROR IN GWT1BAS6WTF'
+      END IF
+   20 CONTINUE
+C
+C9------RETURN
+ 1000 RETURN
+      END
+

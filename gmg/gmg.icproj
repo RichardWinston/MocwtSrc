@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Intel C++ Project"
+	Version="11.1"
+	Name="gmg"
+	ProjectGUID="{6F691E56-534A-4B8E-B603-9F82AC584A7B}"
+	VCNestedProjectGUID="{889982E1-B846-4EBD-801A-83A896B4E568}"
+	VCNestedProjectFileName="gmg.vcproj">
+	<Configurations/>
+	<Files/>
+</VisualStudioProject>

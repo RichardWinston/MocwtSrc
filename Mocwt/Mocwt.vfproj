@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{9F549AB3-5C58-4B22-875C-E93521D0C873}">
+	<Platforms>
+		<Platform Name="Win32"/>
+		<Platform Name="x64"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Interfaces="true" DummyAliases="true" FloatingPointExceptionHandling="fpe0" Traceback="true" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalYes" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="8388608"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" FloatingPointExceptionHandling="fpe0" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole" StackReserveSize="8388608"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Interfaces="true" FloatingPointExceptionHandling="fpe0" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalYes" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="8388608"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath="..\amg1r6.f"/>
+		<File RelativePath="..\ctime.f"/>
+		<File RelativePath="..\daf1.f"/>
+		<File RelativePath="..\de45.f"/>
+		<File RelativePath="..\glo1bas6.f"/>
+		<File RelativePath="..\gmg1.f"/>
+		<File RelativePath="..\gutsdaf.f"/>
+		<File RelativePath="..\gwf1bas6.f"/>
+		<File RelativePath="..\gwf1bcf6.f"/>
+		<File RelativePath="..\gwf1chd6.f"/>
+		<File RelativePath="..\gwf1drn6.f"/>
+		<File RelativePath="..\gwf1drt1.f"/>
+		<File RelativePath="..\gwf1ets1.f"/>
+		<File RelativePath="..\gwf1evt6.f"/>
+		<File RelativePath="..\gwf1fhb1.f"/>
+		<File RelativePath="..\gwf1gag5.f"/>
+		<File RelativePath="..\gwf1ghb6.f"/>
+		<File RelativePath="..\gwf1hfb6.f"/>
+		<File RelativePath="..\gwf1huf2.f"/>
+		<File RelativePath="..\gwf1ibs6.f"/>
+		<File RelativePath="..\gwf1lak3.f"/>
+		<File RelativePath="..\gwf1lpf1.f"/>
+		<File RelativePath="..\gwf1mnw1.f"/>
+		<File RelativePath="..\gwf1mnw2.f"/>
+		<File RelativePath="..\gwf1mnwi.f"/>
+		<File RelativePath="..\gwf1rch6.f"/>
+		<File RelativePath="..\gwf1res1.f"/>
+		<File RelativePath="..\gwf1riv6.f"/>
+		<File RelativePath="..\gwf1sfr2.f"/>
+		<File RelativePath="..\gwf1str6.f"/>
+		<File RelativePath="..\gwf1sub1.f"/>
+		<File RelativePath="..\gwf1swt1.f"/>
+		<File RelativePath="..\gwf1wel6.f"/>
+		<File RelativePath="..\gwt1age6.f"/>
+		<File RelativePath="..\gwt1bas6.f"/>
+		<File RelativePath="..\gwt1bdy6.f"/>
+		<File RelativePath="..\gwt1bflx6.f"/>
+		<File RelativePath="..\gwt1ccbd1.f"/>
+		<File RelativePath="..\gwt1cg6.f"/>
+		<File RelativePath="..\gwt1chd6.f"/>
+		<File RelativePath="..\gwt1dk6.f"/>
+		<File RelativePath="..\gwt1dp6.f"/>
+		<File RelativePath="..\gwt1drn6.f"/>
+		<File RelativePath="..\gwt1drt1.f"/>
+		<File RelativePath="..\gwt1dsp6.f"/>
+		<File RelativePath="..\gwt1ell6.f"/>
+		<File RelativePath="..\gwt1evt6.f"/>
+		<File RelativePath="..\gwt1fhb6.f"/>
+		<File RelativePath="..\gwt1ghb6.f"/>
+		<File RelativePath="..\gwt1hfb6.f"/>
+		<File RelativePath="..\gwt1int6.f"/>
+		<File RelativePath="..\gwt1lak3.f"/>
+		<File RelativePath="..\gwt1main6.f"/>
+		<File RelativePath="..\gwt1mb6.f"/>
+		<File RelativePath="..\gwt1mbrp1.f"/>
+		<File RelativePath="..\gwt1mnw1.f"/>
+		<File RelativePath="..\gwt1mnw2.f"/>
+		<File RelativePath="..\gwt1mnwo1.f"/>
+		<File RelativePath="..\gwt1mov6.f"/>
+		<File RelativePath="..\gwt1obs6.f"/>
+		<File RelativePath="..\gwt1pct1.f"/>
+		<File RelativePath="..\gwt1ptob.f"/>
+		<File RelativePath="..\gwt1rch6.f"/>
+		<File RelativePath="..\gwt1riv6.f"/>
+		<File RelativePath="..\gwt1sfr2.f"/>
+		<File RelativePath="..\gwt1sgm.f"/>
+		<File RelativePath="..\gwt1src6.f"/>
+		<File RelativePath="..\gwt1sstr6.f"/>
+		<File RelativePath="..\gwt1utl6.f"/>
+		<File RelativePath="..\gwt1vel6.f"/>
+		<File RelativePath="..\gwt1wel6.f"/>
+		<File RelativePath="..\hufutl2.f"/>
+		<File RelativePath="..\hydmod.f"/>
+		<File RelativePath="..\lmg1OFF.f"/>
+		<File RelativePath="..\lmt6.f"/>
+		<File RelativePath="..\memchk.f"/>
+		<File RelativePath="..\mf2k.f"/>
+		<File RelativePath="..\mhc1.f90"/>
+		<File RelativePath="..\move_weight.f"/>
+		<File RelativePath="..\obs1adv2.f"/>
+		<File RelativePath="..\obs1bas6.f"/>
+		<File RelativePath="..\obs1drn6.f"/>
+		<File RelativePath="..\obs1drt1.f"/>
+		<File RelativePath="..\obs1ghb6.f"/>
+		<File RelativePath="..\obs1riv6.f"/>
+		<File RelativePath="..\obs1str6.f"/>
+		<File RelativePath="..\para-non.f"/>
+		<File RelativePath="..\parutl1.f"/>
+		<File RelativePath="..\pcg2.f"/>
+		<File RelativePath="..\pes1bas6.f"/>
+		<File RelativePath="..\pes1gau1.f"/>
+		<File RelativePath="..\ppc_v3.0.f"/>
+		<File RelativePath="..\ptwt1.f"/>
+		<File RelativePath="..\rtedaf.f"/>
+		<File RelativePath="..\sen1bas6.f"/>
+		<File RelativePath="..\sen1chd6.f"/>
+		<File RelativePath="..\sen1drn6.f"/>
+		<File RelativePath="..\sen1drt1.f"/>
+		<File RelativePath="..\sen1ets1.f"/>
+		<File RelativePath="..\sen1evt6.f"/>
+		<File RelativePath="..\sen1ghb6.f"/>
+		<File RelativePath="..\sen1hfb6.f"/>
+		<File RelativePath="..\sen1huf2.f"/>
+		<File RelativePath="..\sen1lpf1.f"/>
+		<File RelativePath="..\sen1rch6.f"/>
+		<File RelativePath="..\sen1riv6.f"/>
+		<File RelativePath="..\sen1str6.f"/>
+		<File RelativePath="..\sen1wel6.f"/>
+		<File RelativePath="..\sip5.f"/>
+		<File RelativePath="..\sor5.f"/>
+		<File RelativePath="..\utl6.f"/></Filter></Files>
+	<Globals/></VisualStudioProject>

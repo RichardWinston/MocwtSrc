@@ -1,0 +1,13 @@
+# Data read from C:\MocwtNew\Experiment\mt3dms\mmoc\rmamtmmoc.mnm
+# File generated on 4/6/2016 5:44:01 PM
+LIST 7 rmamtmmoc.mls
+BTN 11 rmamtmmoc.btn
+ADV 12 rmamtmmoc.adv
+DSP 13 rmamtmmoc.dsp
+SSM 14 rmamtmmoc.ssm
+GCG 15 rmamtmmoc.gcg
+DATA 17 rmamtmmoc.cnf
+DATA(BINARY) 201 rmamtmmA.ucn
+DATA 401 rmamtmmA.mto
+DATA 601 rmamtmmA.mass
+FTL 18 rmamtmmoc.ftl

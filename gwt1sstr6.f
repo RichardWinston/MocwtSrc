@@ -1,0 +1,23 @@
+C
+C   GWT1BFLX5DF -- READ SSTR FLAG
+C     ****************************************************************
+C
+      SUBROUTINE GWT1SSTR5DF(INSSTR,IOUTS,IPERGWT)
+C
+C READ FLAG FOR FIRST PERIOD TO SIMULATE TRANSPORT
+      WRITE(IOUTS,*)
+c if SSTR off, set 1st period to 1      
+	IF(INSSTR.LE.0) THEN
+        IPERGWT=1
+	ELSE
+        WRITE(IOUTS,*) 'SSTR PACKAGE ACTIVATED '
+        READ(INSSTR,*) IPERGWT
+        WRITE(IOUTS,*) 'FIRST STRESS PERIOD FOR TRANSPORT (IPERGWT) =',
+     &   IPERGWT
+      END IF
+C
+      WRITE(IOUTS,*)
+      RETURN
+      END
+C
+C

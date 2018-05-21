@@ -1,0 +1,11 @@
+# Data read from C:\MocwtNew\testcases\MOCWT Documentation Data Sets\Dirac uni-mocwt\NewResults\DiracUnidirectional\D-Uni.nam
+# File generated on 12/8/2016 4:18:23 PM
+LIST 13 D-Uni.lst
+DIS 14 D-Uni.dis
+BAS6 15 D-Uni.bas
+OC 18 D-Uni.oc
+LPF 19 D-Uni.lpf
+PCG 20 D-Uni.pcg
+GWT 21 D-Uni.gwt
+DATA 11 D-Uni.fhd
+DATA(BINARY) 7 D-Uni.bud REPLACE
